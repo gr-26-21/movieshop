@@ -1,4 +1,5 @@
 // GROUP A + B fusion schema.prisma
+
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -9,10 +10,9 @@ datasource db {
 }
 
 model Movie {
-
   tmdbId Int @unique
 
-  id          String   @id @default(cuid())
+  id          String        @id @default(cuid())
   title       String
   description String
   price       Int
@@ -20,38 +20,30 @@ model Movie {
   imageUrl    String?
   stock       Int
   runtime     Int
- 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
- 
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
   // authorId   Int?
   // directorId Int?
- 
   // author   Author?   @relation(fields: [authorId], references: [id])
   // director Director? @relation(fields: [directorId], references: [id])
- 
-  genres Genre[]
-  persons MoviePerson[]
-  orderItems OrderItem[]
+  genres      Genre[]
+  persons     MoviePerson[]
+  orderItems  OrderItem[]
 }
-
-
 
 model Genre {
   id          String  @id @default(cuid())
-  tmdbId      Int @unique
+  tmdbId      Int     @unique
   name        String  @unique
   description String?
   movies      Movie[]
 }
- 
-
 // Person (actor, director)
+
 enum PersonRole {
   ACTOR
   DIRECTOR
 }
-
 
 model Person {
   tmdbId Int @unique
@@ -63,20 +55,19 @@ model Person {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
- 
+
 model MoviePerson {
   id       String     @id @default(cuid())
   personId String
   movieId  String
   role     PersonRole
- 
-  person Person @relation(fields: [personId], references: [id])
-  movie  Movie  @relation(fields: [movieId], references: [id])
- 
+  person   Person     @relation(fields: [personId], references: [id])
+  movie    Movie      @relation(fields: [movieId], references: [id])
+
   @@unique([movieId, personId, role])
 }
- 
 // order
+
 enum OrderStatus {
   PENDING
   PAID
@@ -88,44 +79,36 @@ model Order {
   totalAmount Int
   status      OrderStatus @default(PENDING)
   createdAt   DateTime    @default(now())
- 
-  items OrderItem[]
- 
-  userId    String
-  addressId String
- 
-  user    User    @relation(fields: [userId], references: [id])
-  address Address @relation(fields: [addressId], references: [id])
+  items       OrderItem[]
+  userId      String
+  addressId   String
+  user        User        @relation(fields: [userId], references: [id])
+  address     Address     @relation(fields: [addressId], references: [id])
 }
- 
+
 model OrderItem {
   id              String @id @default(cuid())
   quantity        Int
   priceAtPurchase Int
- 
-  orderId String
-  movieId String
- 
-  order Order @relation(fields: [orderId], references: [id])
-  movie Movie @relation(fields: [movieId], references: [id])
+  orderId         String
+  movieId         String
+  order           Order  @relation(fields: [orderId], references: [id])
+  movie           Movie  @relation(fields: [movieId], references: [id])
 }
 
-
 // address
+
 model Address {
-  id         String @id @default(cuid())
+  id         String  @id @default(cuid())
   name       String
   street     String
   city       String
   postalCode String
   country    String
- 
-  orders Order[]
- 
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
+  orders     Order[]
+  userId     String
+  user       User    @relation(fields: [userId], references: [id])
 }
- 
 
 model User {
   id            String    @id
@@ -138,14 +121,19 @@ model User {
   sessions      Session[]
   accounts      Account[]
 
-// Added
-    orders     Order[]
-  addresses  Address[]
- 
+  // Added
+  orders    Order[]
+  addresses Address[]
+
+  role       String?
+  banned     Boolean?  @default(false)
+  banReason  String?
+  banExpires DateTime?
+
   @@unique([email])
   @@map("user")
 }
- 
+
 model Session {
   id        String   @id
   expiresAt DateTime
@@ -156,12 +144,14 @@ model Session {
   userAgent String?
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
+
+  impersonatedBy String?
+
   @@unique([token])
   @@index([userId])
   @@map("session")
 }
- 
+
 model Account {
   id                    String    @id
   accountId             String
@@ -177,11 +167,11 @@ model Account {
   password              String?
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
- 
+
   @@index([userId])
   @@map("account")
 }
- 
+
 model Verification {
   id         String   @id
   identifier String
@@ -189,7 +179,7 @@ model Verification {
   expiresAt  DateTime
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
- 
+
   @@index([identifier])
   @@map("verification")
 }
