@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import { deleteMovie } from "@/actions/delete.action";
+import { deleteMovie } from "@/actions/delete-action";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { startTransition, useActionState } from "react";
 
 interface MovieDeleteDialogProps {
-    movieId: any;
+    movieId: string;
     redirectTo?: string;
 }
 
