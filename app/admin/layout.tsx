@@ -1,4 +1,4 @@
-import AdminSidebar from "@/app/admin/_components/AdminSidebar";
+import AdminSidebar from "@/app/admin/_components/admin-sidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";

@@ -15,13 +15,7 @@ import { toast } from "@/components/ui/toast";
 import { authClient } from "@/lib/auth-client";
 import { useForm } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
-import z from "zod";
-
-// schema
-const formSchema = z.object({
-  email: z.email("Invalid email"),
-  password: z.string().min(1, "Password is required"),
-});
+import { signInSchema } from "@/lib/schemas/auth.schema";
 
 // component
 export function SignInForm() {
@@ -32,7 +26,7 @@ export function SignInForm() {
       password: "",
     },
     validators: {
-      onSubmit: formSchema,
+      onSubmit: signInSchema,
     },
     onSubmit: async ({ value }) => {
       const { data, error } = await authClient.signIn.email({
@@ -58,9 +52,9 @@ export function SignInForm() {
       const userRole = data?.user?.role;
 
       if (userRole === "admin") {
-        router.push("/admin/dashboard");
+        router.push("/admin/");
       } else {
-        router.push("/user/dashboard");
+        router.push("/user/");
       }
 
       router.refresh();
