@@ -42,7 +42,11 @@ const formSchema = z.object({
     .max(75, "Title must be at most 75 characters"),
   description: z.string().min(1, "Description is required"),
   price: z.string().min(1, "Price is required"),
-  releaseDate: z.iso.date("Invalid release date"),
+  releaseDate: z
+      .string().date("Invalid date").refine((val) => { const year = parseInt(val.split("-")[0], 10);
+        const currentYear = new Date().getFullYear();
+        return year >= 1000 && year <= currentYear;
+      }, "Movie year must be between 1000 and the current year"),
   imageUrl: z.string().min(1, "Image URL is required"),
   stock: z.string().min(1, "Stock is required"),
   runtime: z.string().min(1, "Runtime is required"),

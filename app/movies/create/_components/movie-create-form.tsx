@@ -19,82 +19,67 @@ const formSchema = z.object({
     .string()
     .min(3, "Title has to be at least 3 characters")
     .max(75, "Title must be at most 75 characters"),
-  description: z
-  .string()
-  .min(1, "Description is required"),
-  price: z
-  .string()
-  .min(1, "Price is required"),
+  description: z.string().min(1, "Description is required"),
+  price: z.number().min(1, "Price is required"),
   releaseDate: z
-  .iso.date("Invalid release date"),
-  imageUrl: z
-  .string().min(1, "Image URL is required"),
-  stock: z
-  .string().min(1, "Stock is required"),
-  runtime: z
-  .string().min(1, "Runtime is required"),
-  person: z
-  .string().min(1, "Person is required"),
-  director: z
-  .string().min(1, "Director is required"),
+      .string().date("Invalid date").refine((val) => { const year = parseInt(val.split("-")[0], 10);
+        const currentYear = new Date().getFullYear();
+        return year >= 1000 && year <= currentYear;
+      }, "Movie year must be between 1000 and the current year"),
+  imageUrl: z.string(),
+  stock: z.number().min(1, "Stock is required"),
+  runtime: z.number().min(1, "Runtime is required"),
 });
-
-
 
 export function MovieCreateForm() {
-const form = useForm({
-  defaultValues: {
-    title: "",
-    description: "",
-    price: "",
-    releaseDate: "",
-    imageUrl: "",
-    stock: "",
-    runtime: "",
-    person: "",
-    director: "",
+  const form = useForm({
+    defaultValues: {
+      title: "",
+      description: "",
+      price: 0,
+      releaseDate: "",
+      imageUrl: "",
+      stock: 0,
+      runtime: 0,
+    },
+    validators: {
+      onSubmit: formSchema,
+    },
+    onSubmit: async ({ value }) => {
+      startTransition(async () => {
+        const success = await createMovie(value);
+        console.log("SUCCESS:", success);
+      });
+    },
+  });
 
-  },
-  validators: {
-    onSubmit: formSchema,
-  },
-  onSubmit: async ({ value }) => { 
-    startTransition(async () => {
-      const success = await createMovie(value);
-      console.log("SUCCESS:", success);
-    });
-  },
-});
-
-return (
-  <form
-    onSubmit={(ev) => {
-      ev.preventDefault();
-      form.handleSubmit();
-    }}
+  return (
+    <form
+      onSubmit={(ev) => {
+        ev.preventDefault();
+        form.handleSubmit();
+      }}
     >
-
-
       <FieldGroup>
         <form.Field name="title">
           {(field) => {
             const isInvalid =
               field.state.meta.isTouched && !field.state.meta.isValid;
-              // isTouched = has user interacted with it?
-              // isValid  (!in this case) is not valid
-              // these combined means thats its invalid
+            // isTouched = has user interacted with it?
+            // isValid  (!in this case) is not valid
+            // these combined means thats its invalid
             return (
               <Field data-invalid={isInvalid}>
                 <FieldLabel htmlFor={field.name}>Title</FieldLabel>
-                <Input 
-                id={field.name}
-                name={field.name}
-                value={field.state.value}
-                onBlur={field.handleBlur}
-                onChange={(ev) => field.handleChange(ev.target.value)}
-                aria-invalid={isInvalid}
-                autoComplete="off"
-              />
+                <Input
+                  id={field.name}
+                  name={field.name}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(ev) => field.handleChange(ev.target.value)}
+                  aria-invalid={isInvalid}
+                  autoComplete="off"
+                />
                 {isInvalid && <FieldError errors={field.state.meta.errors} />}
               </Field>
             );
@@ -105,21 +90,21 @@ return (
           {(field) => {
             const isInvalid =
               field.state.meta.isTouched && !field.state.meta.isValid;
-              // isTouched = has user interacted with it?
-              // isValid  (!in this case) is not valid
-              // these combined means thats its invalid
+            // isTouched = has user interacted with it?
+            // isValid  (!in this case) is not valid
+            // these combined means thats its invalid
             return (
               <Field data-invalid={isInvalid}>
                 <FieldLabel htmlFor={field.name}>Description</FieldLabel>
-                <Textarea 
-                id={field.name}
-                name={field.name}
-                value={field.state.value}
-                onBlur={field.handleBlur}
-                onChange={(ev) => field.handleChange(ev.target.value)}
-                aria-invalid={isInvalid}
-                autoComplete="off"
-              />
+                <Textarea
+                  id={field.name}
+                  name={field.name}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(ev) => field.handleChange(ev.target.value)}
+                  aria-invalid={isInvalid}
+                  autoComplete="off"
+                />
                 {isInvalid && <FieldError errors={field.state.meta.errors} />}
               </Field>
             );
@@ -130,21 +115,21 @@ return (
           {(field) => {
             const isInvalid =
               field.state.meta.isTouched && !field.state.meta.isValid;
-              // isTouched = has user interacted with it?
-              // isValid  (!in this case) is not valid
-              // these combined means thats its invalid
+            // isTouched = has user interacted with it?
+            // isValid  (!in this case) is not valid
+            // these combined means thats its invalid
             return (
               <Field data-invalid={isInvalid}>
                 <FieldLabel htmlFor={field.name}>Price</FieldLabel>
-                <Input 
-                id={field.name}
-                name={field.name}
-                value={field.state.value}
-                onBlur={field.handleBlur}
-                onChange={(ev) => field.handleChange(ev.target.value)}
-                aria-invalid={isInvalid}
-                autoComplete="off"
-              />
+                <Input
+                  id={field.name}
+                  name={field.name}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(ev) => field.handleChange(Number(ev.target.value))}
+                  aria-invalid={isInvalid}
+                  autoComplete="off"
+                />
                 {isInvalid && <FieldError errors={field.state.meta.errors} />}
               </Field>
             );
@@ -155,47 +140,47 @@ return (
           {(field) => {
             const isInvalid =
               field.state.meta.isTouched && !field.state.meta.isValid;
-              // isTouched = has user interacted with it?
-              // isValid  (!in this case) is not valid
-              // these combined means thats its invalid
+            // isTouched = has user interacted with it?
+            // isValid  (!in this case) is not valid
+            // these combined means thats its invalid
             return (
               <Field data-invalid={isInvalid}>
                 <FieldLabel htmlFor={field.name}>Release Date</FieldLabel>
-                <Input 
-                id={field.name}
-                name={field.name}
-                type="date"
-                value={field.state.value}
-                onBlur={field.handleBlur}
-                onChange={(ev) => field.handleChange(ev.target.value)}
-                aria-invalid={isInvalid}
-                autoComplete="off"
-              />
+                <Input
+                  id={field.name}
+                  name={field.name}
+                  type="date"
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(ev) => field.handleChange(ev.target.value)}
+                  aria-invalid={isInvalid}
+                  autoComplete="off"
+                />
                 {isInvalid && <FieldError errors={field.state.meta.errors} />}
               </Field>
             );
           }}
         </form.Field>
 
-        <form.Field name="director">
+        {/* <form.Field name="director">
           {(field) => {
             const isInvalid =
               field.state.meta.isTouched && !field.state.meta.isValid;
-              // isTouched = has user interacted with it?
-              // isValid  (!in this case) is not valid
-              // these combined means thats its invalid
+            // isTouched = has user interacted with it?
+            // isValid  (!in this case) is not valid
+            // these combined means thats its invalid
             return (
               <Field data-invalid={isInvalid}>
                 <FieldLabel htmlFor={field.name}>Director</FieldLabel>
-                <Input 
-                id={field.name}
-                name={field.name}
-                value={field.state.value}
-                onBlur={field.handleBlur}
-                onChange={(ev) => field.handleChange(ev.target.value)}
-                aria-invalid={isInvalid}
-                autoComplete="off"
-              />
+                <Input
+                  id={field.name}
+                  name={field.name}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(ev) => field.handleChange(ev.target.value)}
+                  aria-invalid={isInvalid}
+                  autoComplete="off"
+                />
                 {isInvalid && <FieldError errors={field.state.meta.errors} />}
               </Field>
             );
@@ -206,51 +191,51 @@ return (
           {(field) => {
             const isInvalid =
               field.state.meta.isTouched && !field.state.meta.isValid;
-              // isTouched = has user interacted with it?
-              // isValid  (!in this case) is not valid
-              // these combined means thats its invalid
+            // isTouched = has user interacted with it?
+            // isValid  (!in this case) is not valid
+            // these combined means thats its invalid
 
-              // The error occurs because `"actor"` is not included in the allowed values for the `name` property. 
-              // The type definition only permits the specified fields, such as `person` or `director`. 
+            // The error occurs because `"actor"` is not included in the allowed values for the `name` property.
+            // The type definition only permits the specified fields, such as `person` or `director`.
             return (
               <Field data-invalid={isInvalid}>
                 <FieldLabel htmlFor={field.name}>Credits</FieldLabel>
-                <Input 
-                id={field.name}
-                name={field.name}
-                value={field.state.value}
-                onBlur={field.handleBlur}
-                onChange={(ev) => field.handleChange(ev.target.value)}
-                aria-invalid={isInvalid}
-                autoComplete="off"
-              />
+                <Input
+                  id={field.name}
+                  name={field.name}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(ev) => field.handleChange(ev.target.value)}
+                  aria-invalid={isInvalid}
+                  autoComplete="off"
+                />
                 {isInvalid && <FieldError errors={field.state.meta.errors} />}
               </Field>
             );
           }}
-        </form.Field>
+        </form.Field> */}
 
         <form.Field name="imageUrl">
           {(field) => {
             const isInvalid =
               field.state.meta.isTouched && !field.state.meta.isValid;
-              // isTouched = has user interacted with it?
-              // isValid  (!in this case) is not valid
-              // these combined means thats its invalid
+            // isTouched = has user interacted with it?
+            // isValid  (!in this case) is not valid
+            // these combined means thats its invalid
 
-              // Change input to TextArea if Input to little
+            // Change input to TextArea if Input to little
             return (
               <Field data-invalid={isInvalid}>
                 <FieldLabel htmlFor={field.name}>Image URL</FieldLabel>
-                <Input 
-                id={field.name}
-                name={field.name}
-                value={field.state.value}
-                onBlur={field.handleBlur}
-                onChange={(ev) => field.handleChange(ev.target.value)}
-                aria-invalid={isInvalid}
-                autoComplete="off"
-              />
+                <Input
+                  id={field.name}
+                  name={field.name}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(ev) => field.handleChange(ev.target.value)}
+                  aria-invalid={isInvalid}
+                  autoComplete="off"
+                />
                 {isInvalid && <FieldError errors={field.state.meta.errors} />}
               </Field>
             );
@@ -261,21 +246,21 @@ return (
           {(field) => {
             const isInvalid =
               field.state.meta.isTouched && !field.state.meta.isValid;
-              // isTouched = has user interacted with it?
-              // isValid  (!in this case) is not valid
-              // these combined means thats its invalid
+            // isTouched = has user interacted with it?
+            // isValid  (!in this case) is not valid
+            // these combined means thats its invalid
             return (
               <Field data-invalid={isInvalid}>
                 <FieldLabel htmlFor={field.name}>Stock</FieldLabel>
-                <Input 
-                id={field.name}
-                name={field.name}
-                value={field.state.value}
-                onBlur={field.handleBlur}
-                onChange={(ev) => field.handleChange(ev.target.value)}
-                aria-invalid={isInvalid}
-                autoComplete="off"
-              />
+                <Input
+                  id={field.name}
+                  name={field.name}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(ev) => field.handleChange(Number(ev.target.value))}
+                  aria-invalid={isInvalid}
+                  autoComplete="off"
+                />
                 {isInvalid && <FieldError errors={field.state.meta.errors} />}
               </Field>
             );
@@ -286,21 +271,21 @@ return (
           {(field) => {
             const isInvalid =
               field.state.meta.isTouched && !field.state.meta.isValid;
-              // isTouched = has user interacted with it?
-              // isValid  (!in this case) is not valid
-              // these combined means thats its invalid
+            // isTouched = has user interacted with it?
+            // isValid  (!in this case) is not valid
+            // these combined means thats its invalid
             return (
               <Field data-invalid={isInvalid}>
                 <FieldLabel htmlFor={field.name}>Runtime</FieldLabel>
-                <Input 
-                id={field.name}
-                name={field.name}
-                value={field.state.value}
-                onBlur={field.handleBlur}
-                onChange={(ev) => field.handleChange(ev.target.value)}
-                aria-invalid={isInvalid}
-                autoComplete="off"
-              />
+                <Input
+                  id={field.name}
+                  name={field.name}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(ev) => field.handleChange(Number(ev.target.value))}
+                  aria-invalid={isInvalid}
+                  autoComplete="off"
+                />
                 {isInvalid && <FieldError errors={field.state.meta.errors} />}
               </Field>
             );
@@ -308,18 +293,20 @@ return (
         </form.Field>
 
         <Field orientation="horizontal">
-          <Button type="button" variant="destructive" onClick={() => form.reset()}
+          <Button
+            type="button"
+            variant="destructive"
+            onClick={() => form.reset()}
           >
             Reset
           </Button>
-            <Button type="submit">Submit</Button>
+          <Button type="submit">Submit</Button>
         </Field>
-
       </FieldGroup>
     </form>
-);
+  );
 }
-  // const form = useForm({
+// const form = useForm({
 //   defaultValues: {
 //     title: "",
 //     description: "",
