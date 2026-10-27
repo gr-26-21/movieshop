@@ -1,4 +1,3 @@
-
 "use server";
 
 import prisma from "@/lib/prisma";
@@ -6,64 +5,54 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 const createMovieSchema = z.object({
-    title: z
+  title: z
     .string()
     .min(3, "Title has to be at least 3 characters")
     .max(75, "Title must be at most 75 characters"),
 
   description: z.string().min(1, "Description is required"),
-  price: z.string().min(1, "Price is required"),
+  price: z.number().min(1, "Price is required"),
   releaseDate: z.iso.date("Release date is required"),
   imageUrl: z.string().min(1, "Image URL is required"),
-  stock: z.string().min(1, "Stock is required"),
-  runtime: z.string().min(1, "Runtime is required"),
-  person: z.string().min(1, "Person is required"),
-  director: z.string().min(1, "Director is required"),
+  stock: z.number().min(1, "Stock is required"),
+  runtime: z.number().min(1, "Runtime is required"),
 });
 
 type CreateMovieInput = z.input<typeof createMovieSchema>;
 
 export async function createMovie(input: CreateMovieInput) {
-  let movieId: string; // maybe not number?
-  try{
-  const data = createMovieSchema.parse(input);
+  try {
+    const data = createMovieSchema.parse(input);
 
     const movie = await prisma.movie.create({
       data: {
+        tmdbId: Math.floor(Math.random() * 100000), //temporary test, properly implement after testing
         title: data.title,
         description: data.description,
-        price: Number(data.price),
+        price: data.price,
         releaseDate: new Date(data.releaseDate),
         imageUrl: data.imageUrl,
-        stock: Number(data.stock),
-        runtime: Number(data.runtime),
-        person: data.person, // connectOrCreate with TmdBId: data.tmdbId
-      }
+        stock: data.stock,
+        runtime: data.runtime,
+      },
+      // Fixa sedan update genom att kopiera data o kasta in den i update data
     });
-    movieId = movie.id;
 
-
-
-
-
-
-} catch (err) {
-  if (err instanceof z.ZodError) {
+    const movieId = movie.id;
+    redirect(`/movies/${movieId}`);
+  } catch (err) {
+    if (err instanceof z.ZodError) {
+      return false;
+    }
+    // throw err;
     return false;
   }
-  // throw err;
-  return false;
 }
-  redirect(`/movies/${movieId}`);  
-}
-  // zod library works by validating data which will return clena validated / transformed data since 
-  // we might do trnasforms in this schema, uppercase/trims
-  // parse means validate
+// zod library works by validating data which will return clena validated / transformed data since
+// we might do trnasforms in this schema, uppercase/trims
+// parse means validate
 
-
-
-
-// "use server"; 
+// "use server";
 
 // import prisma from "@/lib/prisma";
 // import { revalidatePath } from "next/cache";
@@ -83,8 +72,6 @@ export async function createMovie(input: CreateMovieInput) {
 //   imageUrl: z.string().min(1, "Image URL is required"),
 //   stock: z.string().min(1, "Stock is required"),
 //   runtime: z.string().min(1, "Runtime is required"),
-//   person: z.string().min(1, "Person is required"),
-//   director: z.string().min(1, "Director is required"),
 // });
 
 // type CreateMovieInput = z.input<typeof createMovieSchema>;
