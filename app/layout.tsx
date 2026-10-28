@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { cn } from "@/lib/utils";
 import { MainNavbar } from "@/components/main-navbar";
+import { Toaster } from "@/components/ui/toast";
 
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -32,7 +33,7 @@ export default function RootLayout({
         <ThemeProvider>
            <MainNavbar />
           {children}
-         
+            <Toaster />
           </ThemeProvider>
           
       </body>
