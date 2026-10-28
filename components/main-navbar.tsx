@@ -10,6 +10,7 @@ const links = [
     { label: "Home", href: "/" },
     { label: "About", href: "/about"},
     { label: "Movies", href: "/movies"},
+    { label: "Create Movie", href: "/movies/create" },
     // Add Navbar options
 ];
 
