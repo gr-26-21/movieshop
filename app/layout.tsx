@@ -3,8 +3,9 @@ import { Geist_Mono, Outfit } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { cn } from "@/lib/utils";
-import { MainNavbar } from "@/components/main-navbar";
+import MainNavbar from "@/components/main-navbar";
 import { Toaster } from "@/components/ui/toast";
+import { CartProvider } from "@/context/cart-context";
 
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -31,11 +32,12 @@ export default function RootLayout({
     >
       <body>
         <ThemeProvider>
-           <MainNavbar />
-          {children}
+          <CartProvider>
+            <MainNavbar />
+            {children}
             <Toaster />
-          </ThemeProvider>
-          
+          </CartProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
