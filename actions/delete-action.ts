@@ -15,5 +15,6 @@ export async function deleteMovie(
   });
 
   revalidatePath("/movies");
+  // revalidatePath("/admin/movies");
   redirect(`${redirectTo ?? "/movies"}?toast=deleted`);
 }
