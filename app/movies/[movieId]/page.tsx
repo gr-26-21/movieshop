@@ -1,70 +1,61 @@
 import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
-import { MovieDeleteDialog } from "./_components/movie-delete-dialog";
 import { buttonVariants } from "@/components/ui/button";
 import Link from "next/link";
-import { MovieUpdateDrawer } from "./update/_components/movie_update_drawer";
+import { AddToCartButton } from "@/components/add-to-cart-button";
 
 export default async function MovieDetailsPage(
-    props: PageProps<"/movies/[movieId]">
+  props: PageProps<"/movies/[movieId]">
 ) {
-    const params = await props.params;
-    const movieId = parseInt(params.movieId);
-    if (Number.isNaN(movieId)) {
-        notFound();
-    }
-    const movie = await prisma.movie.findUnique({
-        where: { id: movieId },
-        include: { person: true}, 
-    });
+  const params = await props.params;
+  const movieId = params.movieId;
 
-    if (!movie) {
-        notFound();
-    }
-    
-return (
-  
-<div className="space-y-2 p-6">
+  const movie = await prisma.movie.findUnique({
+    where: { id: movieId },
+    include: {
+      persons: {
+        include: {
+          person: true,
+        },
+      },
+    },
+  });
 
-  <div className="flex items-center justify-between">
-    <h1 className="text-3xl font-bold">
-      {movie.title}
-    </h1>
+  if (!movie) {
+    notFound();
+  }
 
-    <Link
-      href="/listing"
-      className={buttonVariants({ variant: "outline" })}
-    >
-      Back to List
-    </Link>
-  </div>
+  return (
+    <div className="space-y-2 p-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold">{movie.title}</h1>
 
-  <h2 className="mt-2 text-lg text-black-500 font-bold">
-    Person: {movie.person?.name ?? "Deleted Person"}
-  </h2>
+        <Link href="/movies" className={buttonVariants({ variant: "outline" })}>
+          Back to List
+        </Link>
+      </div>
 
-  <p>
-    Release Date: {movie.releaseDate.toLocaleDateString("sv-SE")}
-  </p>
+      <h2 className="text-black-500 mt-2 text-lg font-bold">
+        Persons: {movie.persons.length}
+      </h2>
 
-  <h2 className="text-gray-500">
-    Director: {movie.director?.name ?? "Deleted Director"}
+      <p>Release Date: {movie.releaseDate.toLocaleDateString("sv-SE")}</p>
 
-    <div className="flex gap-2">
-
-<MovieUpdateDrawer
-  movie={{
-    id: movie.id,
-    title: movie.title,
-    person: movie.person?.name ?? "Deleted Person",
-    releaseDate: new Date(movie.releaseDate),
-    director: movie.director?.name ?? "Deleted Director",
-  }}
-/>
-
-        <MovieDeleteDialog movieId={movie.id} redirectTo="/movies" /> 
-        </div>
-    </h2>
-  </div>
-);
+      <h2 className="text-gray-500">
+        Director:{" "}
+        {movie.persons.find((item) => item.role === "DIRECTOR")?.person.name ??
+          "No director"}
+      </h2>
+      <AddToCartButton
+        product={{
+          id: movie.id,
+          title: movie.title,
+          price: movie.price,
+          description: movie.description,
+          imageUrl: movie.imageUrl,
+        }}
+        disabled={movie.stock <= 0}
+      />
+    </div>
+  );
 }

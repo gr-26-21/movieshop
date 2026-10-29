@@ -1,9 +1,6 @@
-import { z } from "zod";
+import z from "zod";
 
-/**
- * Valideringsschema för kunduppgifter i kassan.
- */
-
+// checkout
 export const checkoutSchema = z.object({
   name: z
     .string()
@@ -36,7 +33,4 @@ export const checkoutSchema = z.object({
     .regex(/^[\p{L}\s'-]+$/u, "Please enter a valid city."),
 });
 
-/**
- * TypeScript-typ som skapas från Zod-schemat.
- */
 export type CheckoutFormData = z.infer<typeof checkoutSchema>;

@@ -90,7 +90,7 @@ export default function CartPage() {
       <div className="mt-4 mb-4 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
         <Link
           id="continue-shopping"
-          href="/"
+          href="/movies"
           className="inline-flex min-h-11 w-full max-w-64 items-center justify-center rounded-full border-2 border-primary px-6 py-3 text-sm font-semibold text-primary transition-colors hover:bg-primary/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:w-auto dark:border-red-400 dark:text-red-400 dark:focus-visible:outline-red-400"
         >
           Continue Shopping
