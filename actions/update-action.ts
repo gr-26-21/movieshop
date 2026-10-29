@@ -16,7 +16,7 @@ const updateMovieSchema = z.object({
     description: z.string().min(1, "Description is required"),
     price: z.number().min(1, "Price is required"),
     releaseDate: z.iso.date("Release date is required"),
-    imageUrl: z.string().min(1, "Image URL is required"),
+    imageUrl: z.string(),
     stock: z.number().min(1, "Stock is required"),
     runtime: z.number().min(1, "Runtime is required"),
 //   title: z
