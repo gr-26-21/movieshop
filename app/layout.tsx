@@ -30,11 +30,9 @@ export default function RootLayout({
     >
       <body>
         <ThemeProvider>
-           <MainNavbar />
+          <MainNavbar />
           {children}
-         
-          </ThemeProvider>
-          
+        </ThemeProvider>
       </body>
     </html>
   );
