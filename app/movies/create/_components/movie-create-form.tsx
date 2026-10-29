@@ -13,6 +13,8 @@ import { Input } from "@/components/ui/input";
 import { createMovie } from "@/actions/create-action";
 import { Textarea } from "@/components/ui/textarea";
 import { startTransition } from "react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   title: z
@@ -32,6 +34,9 @@ const formSchema = z.object({
 });
 
 export function MovieCreateForm() {
+  const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const form = useForm({
     defaultValues: {
       title: "",
@@ -45,12 +50,25 @@ export function MovieCreateForm() {
     validators: {
       onSubmit: formSchema,
     },
-    onSubmit: async ({ value }) => {
-      startTransition(async () => {
-        const success = await createMovie(value);
-        console.log("SUCCESS:", success);
-      });
-    },
+onSubmit: async ({ value }) => {
+  if (isSubmitting) return;
+
+  setIsSubmitting(true);
+
+  try {
+    const success = await createMovie(value);
+
+    if (!success) {
+      console.error("Movie creation failed");
+      return;
+    }
+
+    // The server action redirects on success.
+    router.refresh();
+  } finally {
+    setIsSubmitting(false);
+  }
+},
   });
 
   return (
@@ -224,7 +242,9 @@ export function MovieCreateForm() {
           >
             Reset
           </Button>
-          <Button type="submit">Submit</Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "Creating..." : "Create Movie"}
+          </Button>
         </Field>
       </FieldGroup>
     </form>
