@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCart } from "@/context/cart_context";
+import { useCart } from "@/context/cart-context";
 import { Progress } from "@/components/ui/progress";
 
 const steps = [

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCart } from "@/context/cart_context";
+import { useCart } from "@/context/cart-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 /**

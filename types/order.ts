@@ -1,5 +1,5 @@
-import type { CartItem } from "@/context/cart_context";
-import type { CheckoutFormData } from "@/schemas/checkout_schema";
+import type { CartItem } from "@/context/cart-context";
+import type { CheckoutFormData } from "@/lib/schemas/checkout.schema";
 
 export type Order = {
   customer: CheckoutFormData;

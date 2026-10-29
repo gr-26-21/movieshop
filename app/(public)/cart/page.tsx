@@ -1,10 +1,10 @@
 "use client";
 
-import { useCart } from "@/context/cart_context";
+import { useCart } from "@/context/cart-context";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
-import { CheckoutProgress } from "@/components/checkout_progress";
-import CartItemCard from "@/components/cart_item";
+import { CheckoutProgress } from "@/components/checkout-progress";
+import CartItemCard from "@/components/cart-item";
 import { useEffect, useRef } from "react";
 
 export default function CartPage() {

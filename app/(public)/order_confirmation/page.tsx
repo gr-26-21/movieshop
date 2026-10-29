@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { Order } from "@/types/order";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckoutProgress } from "@/components/checkout_progress";
+import { CheckoutProgress } from "@/components/checkout-progress";
 import Link from "next/link";
 
 /**

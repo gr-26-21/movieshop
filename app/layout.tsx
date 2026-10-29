@@ -3,7 +3,7 @@ import { Geist_Mono, Outfit } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { cn } from "@/lib/utils";
-import { CartProvider } from "@/context/cart_context";
+import { CartProvider } from "@/context/cart-context";
 
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-sans" });
 

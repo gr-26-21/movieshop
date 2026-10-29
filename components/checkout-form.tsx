@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import {
   checkoutSchema,
   type CheckoutFormData,
-} from "@/schemas/checkout_schema";
+} from "@/lib/schemas/checkout.schema";
 
 type CheckoutFormProps = {
   onCheckout: (customer: CheckoutFormData) => void;

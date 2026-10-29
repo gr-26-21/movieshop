@@ -1,7 +1,7 @@
 "use client";
 
-import type { CartItem } from "@/context/cart_context";
-import { useCart } from "@/context/cart_context";
+import type { CartItem } from "@/context/cart-context";
+import { useCart } from "@/context/cart-context";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Plus, Minus, Trash2 } from "lucide-react";

@@ -1,12 +1,12 @@
 "use client";
 
-import { useCart } from "@/context/cart_context";
+import { useCart } from "@/context/cart-context";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { CheckoutProgress } from "@/components/checkout_progress";
-import OrderSummary from "@/components/order_summary";
-import CheckoutForm from "@/components/checkout_form";
-import type { CheckoutFormData } from "@/schemas/checkout_schema";
+import { CheckoutProgress } from "@/components/checkout-progress";
+import OrderSummary from "@/components/order-summary";
+import CheckoutForm from "@/components/checkout-form";
+import type { CheckoutFormData } from "@/lib/schemas/checkout.schema";
 import type { Order } from "@/types/order";
 
 export default function CheckoutPage() {
