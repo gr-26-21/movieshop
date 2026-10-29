@@ -1,5 +1,6 @@
 "use client";
 
+
 import { updateMovie } from "@/actions/update-action";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,13 +17,13 @@ import z from "zod";
 
 interface MovieUpdateFormProps {
   movie: {
-    // tmdbId?: number;
+    tmdbId: number | null;
     id: string;
     title: string;
     description: string;
     price: number;
     releaseDate: Date;
-    imageUrl: string;
+    imageUrl: string | null;
     stock: number;
     runtime: number;
   };
@@ -55,7 +56,7 @@ export function MovieUpdateForm({ movie }: MovieUpdateFormProps) {
       description: movie.description,
       price: movie.price,
       releaseDate: movie.releaseDate.toISOString().split("T")[0],
-      imageUrl: movie.imageUrl,
+      imageUrl: movie.imageUrl ?? "",
       stock: movie.stock,
       runtime: movie.runtime,
     },

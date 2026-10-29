@@ -20,7 +20,7 @@ interface BrowsingFormProps {
     description: string;
     price: number;
     releaseDate: Date;
-    imageUrl: string;
+    imageUrl?: string | null;
     stock: number;
     runtime: number;
     person: {
