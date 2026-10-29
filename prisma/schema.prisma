@@ -10,7 +10,8 @@ datasource db {
 }
 
 model Movie {
-  tmdbId Int @unique
+
+  tmdbId Int? @unique
 
   id          String        @id @default(cuid())
   title       String
@@ -33,12 +34,11 @@ model Movie {
 
 model Genre {
   id          String  @id @default(cuid())
-  tmdbId      Int     @unique
+  tmdbId      Int? @unique
   name        String  @unique
   description String?
   movies      Movie[]
 }
-// Person (actor, director)
 
 enum PersonRole {
   ACTOR
@@ -46,7 +46,7 @@ enum PersonRole {
 }
 
 model Person {
-  tmdbId Int @unique
+  tmdbId Int? @unique
 
   id     String        @id @default(cuid())
   name   String
@@ -66,8 +66,7 @@ model MoviePerson {
 
   @@unique([movieId, personId, role])
 }
-// order
-
+ 
 enum OrderStatus {
   PENDING
   PAID
@@ -96,8 +95,6 @@ model OrderItem {
   movie           Movie  @relation(fields: [movieId], references: [id])
 }
 
-// address
-
 model Address {
   id         String  @id @default(cuid())
   name       String
@@ -109,7 +106,7 @@ model Address {
   userId     String
   user       User    @relation(fields: [userId], references: [id])
 }
-
+ 
 model User {
   id            String    @id
   name          String
