@@ -1,28 +1,35 @@
 import Link from "next/link";
-import { buttonVariants } from "./ui/button";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
-const linkClassName = buttonVariants({
-    variant: "secondary",
-    size: "lg",
-});
+import { SignInForm } from "./auth/sign-in-form";
+import { RegisterForm } from "./auth/register-form";
+import { SignOutButton } from "./sign-out-button";
 
-const links = [
-    { label: "Home", href: "/" },
-    { label: "About", href: "/about"},
-    { label: "Movies", href: "/movies"},
-    { label: "Create Movie", href: "/movies/create" },
-    // Add Navbar options
-];
+export default async function MainNavbar() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
 
-export function MainNavbar() {
-    return (
-        <nav className="flex h-15 items-center gap-2 border-b  px-6">
-            {links.map((link) => (
-                <Link key={link.href} href={link.href} className=
-                {linkClassName}>
-                    {link.label}
-                    </Link>
-            ))}
-            </nav>
-    );
+  return (
+    <nav className="flex h-15 items-center justify-between gap-2 border-b px-6">
+      {/* logo */}
+      <div>
+        <Link href={"/"}>
+          <h1 className="text-3xl">MovieShop</h1>
+        </Link>
+      </div>
+      {/* sign-in, sign-up */}
+      <div className="flex gap-2">
+        {session ? (
+          <SignOutButton />
+        ) : (
+          <>
+            <SignInForm />
+            <RegisterForm />
+          </>
+        )}
+      </div>
+    </nav>
+  );
 }
