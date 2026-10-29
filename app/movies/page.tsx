@@ -30,8 +30,8 @@ export default async function MoviesPage() {
         <CardHeader>
             <CardTitle>{movie.title}</CardTitle>
             <CardDescription>
-                Director: {movie.director?.name ?? "Deleted Director"}
-                Genre: {movie.genres.map((genre) => genre.name).join(", ") || "No genres"} 
+                {/* Director: {movie.director?.name ?? "Deleted Director"}
+                Genre: {movie.genres.map((genre) => genre.name).join(", ") || "No genres"}  */}
             </CardDescription> 
         </CardHeader>
         <CardContent>
