@@ -20,10 +20,10 @@ interface BrowsingFormProps {
     description: string;
     price: number;
     releaseDate: Date;
-    imageUrl: string;
+    imageUrl?: string | null;
     stock: number;
     runtime: number;
-    author: {
+    person: {
       name: string;
     } | null;
   }[];
@@ -37,7 +37,7 @@ export default function BrowsingForm({ movies }: BrowsingFormProps) {
 
     return (
       movie.title.toLowerCase().includes(searchTerm) ||
-      movie.author?.name.toLowerCase().includes(searchTerm) ||
+      movie.person?.name.toLowerCase().includes(searchTerm) ||
       movie.description.toLowerCase().includes(searchTerm)
     );
   });
@@ -47,7 +47,7 @@ export default function BrowsingForm({ movies }: BrowsingFormProps) {
       {/* Search + Create */}
       <div className="flex flex-col gap-3 sm:flex-row">
         <Input
-          placeholder="Search by title, genre, director or author."
+          placeholder="Search by title, genre, director or person."
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           className="sm:max-w-md"
@@ -75,7 +75,7 @@ export default function BrowsingForm({ movies }: BrowsingFormProps) {
                 </CardTitle>
 
                 <CardDescription>
-                  {movie.author?.name ?? "Deleted Author"}
+                  {movie.person?.name ?? "Deleted Person"}
                 </CardDescription>
               </CardHeader>
 
@@ -122,7 +122,7 @@ export default function BrowsingForm({ movies }: BrowsingFormProps) {
           </h2>
 
           <p className="mt-1 text-sm text-muted-foreground">
-            Try searching for another title, genre, director or author
+            Try searching for another title, genre, director or person
           </p>
 
           {search && (
