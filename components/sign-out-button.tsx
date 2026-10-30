@@ -7,6 +7,7 @@ import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { toast } from "./ui/toast";
 
+// sign-out button
 export function SignOutButton() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
