@@ -17,7 +17,7 @@ import { useForm } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import { registerSchema } from "@/lib/schemas/auth.schema";
 
-// component
+// register form component
 export function RegisterForm() {
   const router = useRouter();
   const myForm = useForm({

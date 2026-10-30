@@ -17,7 +17,7 @@ import { useForm } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import { signInSchema } from "@/lib/schemas/auth.schema";
 
-// component
+// sign-in form component
 export function SignInForm() {
   const router = useRouter();
   const myForm = useForm({
