@@ -1,3 +1,4 @@
+import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import {
   Table,
@@ -50,7 +51,15 @@ export default async function UsersTable() {
               </TableCell>
               <TableCell>{user.email}</TableCell>
               <TableCell>{user.role}</TableCell>
-              <TableCell>{user.banned ? "banned" : "active"}</TableCell>
+              <TableCell>
+                <Badge
+                  className={`px-4 py-3 ${
+                    user.banned ? "bg-red-800" : "bg-green-800"
+                  }`}
+                >
+                  {user.banned ? "banned" : "active"}
+                </Badge>
+              </TableCell>
               <TableCell>{user.createdAt.toLocaleDateString()}</TableCell>
               <TableCell>
                 <div className="flex gap-2">
