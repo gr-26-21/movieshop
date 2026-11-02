@@ -3,14 +3,6 @@ import { notFound } from "next/navigation";
 import { MovieDeleteDialog } from "./_components/movie-delete-dialog";
 import { buttonVariants } from "@/components/ui/button";
 import Link from "next/link";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 
 export default async function MovieDetailsPage(
   props: PageProps<"/movies/[movieId]">
