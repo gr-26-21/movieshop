@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/toast";
+import MainNavbar from "@/components/main-navbar";
 
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-sans" });
 
