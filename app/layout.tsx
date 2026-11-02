@@ -1,10 +1,9 @@
-import { Geist, Geist_Mono, Outfit } from "next/font/google";
+import { Geist_Mono, Outfit } from "next/font/google";
 
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/toast";
-import MainNavbar from "@/components/main-navbar";
 
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -31,7 +30,6 @@ export default function RootLayout({
     >
       <body>
         <ThemeProvider>
-          <MainNavbar />
           {children}
           <Toaster />
         </ThemeProvider>
