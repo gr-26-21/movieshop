@@ -1,7 +1,7 @@
 "use client";
 
 
-import { updateMovie } from "@/actions/update-action";
+import { updateMovie } from "@/app/admin/movies/[movieId]/_components/update-action";
 import { Button } from "@/components/ui/button";
 import {
   Field,
