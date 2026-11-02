@@ -3,6 +3,8 @@ import { Badge } from "@/components/ui/badge";
 import { redirect } from "next/navigation";
 import { CalendarDays, Edit, Mail, User } from "lucide-react";
 import Link from "next/link";
+import SoftDeleteUserButton from "./_components/delete-user-button";
+import RestoreUserButton from "./_components/restore-user-button";
 
 export default async function UserDetailsPage(
   props: PageProps<"/admin/users/[userId]">
@@ -32,10 +34,12 @@ export default async function UserDetailsPage(
   return (
     <>
       {/* basic info */}
-      <div className="mx-auto max-w-6xl space-y-10">
-        <h1 className="text-4xl">User Details</h1>
-        <div className="max-w-6xl rounded-2xl border p-8">
-          <div className="space-y-0.5">
+      <div className="mx-auto max-w-4xl space-y-10">
+        <div className="flex items-center justify-between">
+          <h1 className="text-4xl">User Details</h1>
+        </div>
+        <div className="flex max-w-6xl rounded-2xl border p-8">
+          <div className="flex-1 space-y-0.5">
             <div className="flex items-center gap-3">
               <p className="mb-2 text-3xl">{user.name}</p>
               <Badge
@@ -58,6 +62,11 @@ export default async function UserDetailsPage(
               <CalendarDays size={20} />
               <p>Joined on {user.createdAt.toLocaleDateString()}</p>
             </div>
+          </div>
+          {/* active, deactivate buttons */}
+          <div className="flex flex-col justify-start gap-2 rounded-2xl">
+            <RestoreUserButton userId={user.id} />
+            <SoftDeleteUserButton userId={user.id} />
           </div>
         </div>
 
@@ -84,7 +93,7 @@ export default async function UserDetailsPage(
           {/* email verified */}
           <div className="flex items-center justify-between">
             <span>Email Verified</span>
-            <span>{user.emailVerified}</span>
+            <span>{user.emailVerified ? "verified" : "unverified"}</span>
           </div>
           {/* role */}
           <div className="flex items-center justify-between">

@@ -24,12 +24,15 @@ import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "@/components/ui/toast";
 import z from "zod";
+import { useRouter } from "next/navigation";
 
 export default function UpdateUserForm({
   user,
 }: {
   user: Awaited<ReturnType<typeof auth.api.getUser>>;
 }) {
+  const router = useRouter();
+
   const form = useForm({
     defaultValues: {
       id: user.id,
@@ -72,6 +75,8 @@ export default function UpdateUserForm({
           description: "Account updated",
         });
         formApi.reset(value);
+        router.refresh();
+        router.push("/admin/users");
       } catch (error) {
         if (error instanceof z.ZodError) {
           return false;
