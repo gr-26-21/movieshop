@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { MovieUpdateForm } from "../_components/movie_update_form";
 
 
-export default async function MovieUpdatePage(props: PageProps<"/movies/[movieId]">
+export default async function MovieUpdatePage(props: PageProps<"/admin/movies/[movieId]">
 ) {
   const params = await props.params;
   const movieId = params.movieId;

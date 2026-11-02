@@ -56,9 +56,9 @@ export async function updateMovie(
         // person: data.person, // connectOrCreate with TmdBId: data.tmdbId
       },
     });
-    revalidatePath("/movies");
+    revalidatePath("/admin/movies");
     if (shouldRedirect) {
-      redirect(`/movies/${data.id}`);
+      redirect(`/admin/movies/${data.id}`);
     }
 
     return true;
@@ -118,8 +118,8 @@ export async function updateMovie(
 //   },
 // });
 
-//     revalidatePath("/movies");
-//     revalidatePath(`/movies/${data.id}`);
+//     revalidatePath("/admin/movies");
+//     revalidatePath(`/admin/movies/${data.id}`);
 //   } catch (err) {
 //     console.error(err);
 

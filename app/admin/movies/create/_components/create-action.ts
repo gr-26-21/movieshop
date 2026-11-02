@@ -51,5 +51,5 @@ export async function createMovie(input: CreateMovieInput) {
     return false;
   }
 
-  redirect(`/movies/${movieId}`);
+  redirect(`/admin/movies/${movieId}`);
 }

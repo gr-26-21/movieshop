@@ -103,7 +103,7 @@ export default function BrowsingForm({ movies }: BrowsingFormProps) {
 
               <CardFooter>
                 <Link
-                  href={`/movies/${movie.id}`}
+                  href={`/admin/movies/${movie.id}`}
                   className={buttonVariants({
                     variant: "outline",
                     className: "w-full",
