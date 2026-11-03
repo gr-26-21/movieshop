@@ -54,7 +54,7 @@ export default function BrowsingForm({ movies }: BrowsingFormProps) {
         />
 
         <Link
-          href="/movies/create"
+          href="/admin/movies/create"
           className={buttonVariants()}
         >
           Create New Movie
@@ -103,7 +103,7 @@ export default function BrowsingForm({ movies }: BrowsingFormProps) {
 
               <CardFooter>
                 <Link
-                  href={`/movies/${movie.id}`}
+                  href={`/admin/movies/${movie.id}`}
                   className={buttonVariants({
                     variant: "outline",
                     className: "w-full",
