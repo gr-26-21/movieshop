@@ -54,7 +54,7 @@ export default function BrowsingForm({ movies }: BrowsingFormProps) {
         />
 
         <Link
-          href="/movies/create"
+          href="/admin/movies/create"
           className={buttonVariants()}
         >
           Create New Movie
