@@ -47,6 +47,16 @@ export default function AdminSidebar() {
               <span className="text-xl font-extralight">Movies</span>
             </div>
           </SidebarMenuButton>
+                    {/* create movie */}
+          <SidebarMenuButton
+            render={<Link href="/admin/movies/create" />}
+            className="px-5"
+          >
+            <div className="flex items-center gap-3">
+              <Film />
+              <span className="text-xl font-extralight">Create Movie</span>
+            </div>
+          </SidebarMenuButton>
           {/* orders */}
           <SidebarMenuButton
             render={<Link href="/admin/orders" />}
