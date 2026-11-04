@@ -6,6 +6,15 @@ import { cn } from "@/lib/utils";
 import MainNavbar from "@/components/main-navbar";
 import { Toaster } from "@/components/ui/toast";
 import { CartProvider } from "@/context/cart-context";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: {
+    default: "Movieshop",
+    template: "%s | Movieshop",
+  },
+  description: "Browse movies and shop online at Movieshop.",
+};
 
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-sans" });
 

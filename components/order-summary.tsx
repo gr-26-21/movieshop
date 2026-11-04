@@ -27,7 +27,7 @@ export default function OrderSummary() {
         ) : (
           <div>
             {/* Kolumnrubriker visas från 480 px */}
-            <div className="hidden grid-cols-[minmax(0,1fr)_3rem_4.5rem] gap-2 border-b border-border pb-2 text-xs font-semibold text-muted-foreground min-[480px]:grid sm:text-sm">
+            <div className="hidden grid-cols-[minmax(0,1fr)_3rem_4.5rem] gap-2 border-b border-border pb-2 text-xs font-semibold text-foreground min-[480px]:grid sm:text-sm">
               <span>Movie</span>
               <span className="text-center">Quantity</span>
               <span className="text-right">Price</span>

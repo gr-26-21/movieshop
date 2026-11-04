@@ -11,15 +11,6 @@ export const checkoutSchema = z.object({
       "Please enter both your first and last name."
     ),
 
-  shippingName: z
-    .string()
-    .trim()
-    .min(2, "Please enter the recipient's name.")
-    .refine(
-      (value) => value.split(/\s+/).length >= 2,
-      "Please enter both the recipient's first and last name."
-    ),
-
   email: z.email("Please enter a valid email address."),
 
   address: z

@@ -95,12 +95,15 @@ export default function OrderConfirmationPage() {
         </>
       ) : (
         <>
-          <p>
-            Thank you, {order.customer.name}! Your test order has been
-            completed.
-          </p>
+          <p>Thank you, {order.customer.name}! Your order has been received.</p>
 
-          <p>No real payment has been made.</p>
+          {order.id && (
+            <p>
+              <strong>Order ID:</strong> {order.id}
+            </p>
+          )}
+
+          <p>No payment has been made. Your order is awaiting processing.</p>
 
           {/* Kundens leveransuppgifter */}
           <Card className="my-8 rounded-xl border border-border bg-muted p-5">
@@ -109,7 +112,7 @@ export default function OrderConfirmationPage() {
             </CardHeader>
 
             <CardContent className="grid gap-2">
-              <p>{order.customer.shippingName}</p>
+              <p>{order.customer.name}</p>
               <p>{order.customer.address}</p>
               <p>
                 {order.customer.postcode} {order.customer.city}
