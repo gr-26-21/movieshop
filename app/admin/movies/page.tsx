@@ -1,9 +1,125 @@
-export default function MoviesPage() {
+import { buttonVariants } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import prisma from "@/lib/prisma";
+import Link from "next/link";
+import { MovieCreateForm } from "./create/_components/movie-create-form";
+
+
+
+
+export default async function MoviesPage(){
+  const movies = await prisma.movie.findMany({
+    orderBy: [
+      { updatedAt: "desc" }, { createdAt: "desc" }],
+  });
   return (
-    <>
-      <div className="mx-auto max-w-6xl rounded-2xl border p-5">
-        <h1>movies list page</h1>
-      </div>
-    </>
+        <div className="space-y-2 p-6">
+      <h1 className="text-3xl font-bold">Movies Page</h1> 
+      <h2 className="text-xl font-semibold">This is the Movies page.</h2>
+                     <Link
+                    href={`/admin/movies/create`}
+                    className={buttonVariants({
+                      variant: "secondary",
+                      size: "lg",
+                    })}
+                  >
+                    + Create Movie
+                  </Link>
+                  <br />
+   <div className="grid grid-cols-3 gap-2">
+    
+    {movies.map((movie) => (
+      <Card key={movie.id}>
+        <CardHeader>
+          <CardTitle>{movie.title}</CardTitle>
+          <CardDescription>
+            {movie.description || "Deleted Description"}
+
+
+          </CardDescription>
+        </CardHeader>
+        
+        <CardContent>
+          <p className="line-clamp-2">{movie.description.substring(0, 100)}</p>
+        </CardContent>
+        <CardFooter className="justify-end">
+          <Link href={`/admin/movies/${movie.id}`} className={buttonVariants()}>View Movie</Link>
+        </CardFooter>
+        
+      </Card>
+      
+    ))}
+    </div>
+  </div>
   );
+  
 }
+
+
+
+// import { buttonVariants } from "@/components/ui/button";
+// import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+// import prisma from "@/lib/prisma";
+// import Link from "next/link";
+
+
+// export default async function MoviesPage() {
+//   const movies = await prisma.movie.findMany({
+//     include: {
+//       id: true,
+//       title: true,
+//       description: true,
+//       director: true,
+//       genres: true,
+//       price: true,
+//       releaseDate: true,
+//       imageUrl: true,
+//       stock: true,
+//     },
+//     orderBy: [{ title: "desc" }] 
+//     // order by trendy? :)
+//   });
+
+//   return (
+//     <div className="space-y-2 p-6">
+//       <h1 className="text-3xl font-bold">Movies Page</h1>
+//       <h2 className="text-xl font-semibold">This is the movies page.</h2>
+//     {movies.map((movie) => (
+//         <Card key={movie.id}>
+//         <CardHeader>
+//             <CardTitle>{movie.title}</CardTitle>
+//             <CardDescription>
+//                 {/* Director: {movie.director?.name ?? "Deleted Director"}
+//                 Genre: {movie.genres.map((genre) => genre.name).join(", ") || "No genres"}  */}
+//             </CardDescription> 
+//         </CardHeader>
+//         <CardContent>
+//             <p className="line-clamp-2">{movie.description.substring(0, 100)}</p>
+//             <p className="line-clamp-2">{movie.price}</p>
+//             <p className="line-clamp-2">{movie.releaseDate.toLocaleDateString("sv-SE")}</p>
+//         </CardContent>
+//         <CardContent>
+//             <p className="line-clamp-2">
+//              {movie.imageUrl
+//                 ? movie.imageUrl.substring(0, 100)
+//                 : "No image URL available"}
+//             </p>
+        
+//         <CardDescription>
+//         {movie.stock > 0 ? "In stock" : "Out of stock"}
+//         </CardDescription>
+//         </CardContent>
+//         <CardFooter className="justify-end">
+//                           <Link 
+//               href={`/movies/${movie.id}`}
+//               className={buttonVariants({ variant: "link" })}
+//               >
+//                 View Movie
+//                 </Link>
+//         </CardFooter>
+//         </Card>
+//     ))}
+    
+//     </div>
+//   );
+// }

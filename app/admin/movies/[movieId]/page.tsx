@@ -3,17 +3,9 @@ import { notFound } from "next/navigation";
 import { MovieDeleteDialog } from "./_components/movie-delete-dialog";
 import { buttonVariants } from "@/components/ui/button";
 import Link from "next/link";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 
 export default async function MovieDetailsPage(
-  props: PageProps<"/movies/[movieId]">
+  props: PageProps<"/admin/movies/[movieId]">
 ) {
   const params = await props.params;
   const movieId = params.movieId;
@@ -60,11 +52,11 @@ export default async function MovieDetailsPage(
       </h2>
 
       <div className="flex gap-2">
-        <Link href={`/movies/${movie.id}/update`} className={buttonVariants({ variant: "outline" })}
+        <Link href={`/admin/movies/${movie.id}/update`} className={buttonVariants({ variant: "outline" })}
         >
           Update Movie
           </Link>
-      <MovieDeleteDialog movieId={movie.id} redirectTo="/movies" />
+      <MovieDeleteDialog movieId={movie.id} redirectTo="/admin/movies" />
       <p className="max-w-prose whitespace-pre-line">{movie.description}</p>
     </div>
     </div>

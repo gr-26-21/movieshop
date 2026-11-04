@@ -1,3 +1,4 @@
+import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import {
   Table,
@@ -8,23 +9,21 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import prisma from "@/lib/prisma";
 import { User } from "lucide-react";
 import Link from "next/link";
 
-export default async function UsersTable() {
-  const users = await prisma.user.findMany({
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      role: true,
-      banned: true,
-      createdAt: true,
-    },
-    orderBy: { createdAt: "desc" },
-  });
-
+export default async function UsersTable({
+  users,
+}: {
+  users: {
+    id: string;
+    name: string | null;
+    email: string;
+    role?: string;
+    banned: boolean | null;
+    createdAt: Date;
+  }[];
+}) {
   return (
     <>
       <Table>
@@ -50,7 +49,15 @@ export default async function UsersTable() {
               </TableCell>
               <TableCell>{user.email}</TableCell>
               <TableCell>{user.role}</TableCell>
-              <TableCell>{user.banned ? "banned" : "active"}</TableCell>
+              <TableCell>
+                <Badge
+                  className={`px-4 py-3 ${
+                    user.banned ? "bg-red-800" : "bg-green-800"
+                  }`}
+                >
+                  {user.banned ? "banned" : "active"}
+                </Badge>
+              </TableCell>
               <TableCell>{user.createdAt.toLocaleDateString()}</TableCell>
               <TableCell>
                 <div className="flex gap-2">

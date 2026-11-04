@@ -10,6 +10,7 @@
 
 # testing
 /coverage
+/app/tmdb_test
 
 # next.js
 /.next/

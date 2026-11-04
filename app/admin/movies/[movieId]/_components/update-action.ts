@@ -16,7 +16,7 @@ const updateMovieSchema = z.object({
     description: z.string().min(1, "Description is required"),
     price: z.number().min(1, "Price is required"),
     releaseDate: z.iso.date("Release date is required"),
-    imageUrl: z.string().min(1, "Image URL is required"),
+    imageUrl: z.string(),
     stock: z.number().min(1, "Stock is required"),
     runtime: z.number().min(1, "Runtime is required"),
 //   title: z
@@ -56,9 +56,9 @@ export async function updateMovie(
         // person: data.person, // connectOrCreate with TmdBId: data.tmdbId
       },
     });
-    revalidatePath("/movies");
+    revalidatePath("/admin/movies");
     if (shouldRedirect) {
-      redirect(`/movies/${data.id}`);
+      redirect(`/admin/movies/${data.id}`);
     }
 
     return true;
@@ -118,8 +118,8 @@ export async function updateMovie(
 //   },
 // });
 
-//     revalidatePath("/movies");
-//     revalidatePath(`/movies/${data.id}`);
+//     revalidatePath("/admin/movies");
+//     revalidatePath(`/admin/movies/${data.id}`);
 //   } catch (err) {
 //     console.error(err);
 

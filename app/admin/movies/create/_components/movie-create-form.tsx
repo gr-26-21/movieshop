@@ -10,7 +10,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { createMovie } from "@/actions/create-action";
+import { createMovie } from "@/app/admin/movies/create/_components/create-action";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -27,7 +27,7 @@ const formSchema = z.object({
         const currentYear = new Date().getFullYear();
         return year >= 1000 && year <= currentYear;
       }, "Movie year must be between 1000 and the current year"),
-  imageUrl: z.string().min(1, "Image URL is required"),
+  imageUrl: z.string(),
   stock: z.number().min(1, "Stock is required"),
   runtime: z.number().min(1, "Runtime is required"),
 });

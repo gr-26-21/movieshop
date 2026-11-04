@@ -1,3 +1,3 @@
-export default function Page() {
+export default function HomePage() {
   return <>{/* landing page of movies */}</>;
 }

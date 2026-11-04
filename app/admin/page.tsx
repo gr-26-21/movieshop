@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Film, ShoppingCart, Users, Wallet } from "lucide-react";
+import UserCounter from "./_components/user-counter";
 
 export default function AdminDashboard() {
   return (
@@ -17,7 +18,9 @@ export default function AdminDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-center text-3xl">150</p>
+            <p className="text-center text-3xl">
+              <UserCounter />
+            </p>
           </CardContent>
         </Card>
         {/* total no. of movies */}

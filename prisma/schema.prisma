@@ -10,7 +10,6 @@ datasource db {
 }
 
 model Movie {
-
   tmdbId Int? @unique
 
   id          String        @id @default(cuid())
@@ -34,7 +33,7 @@ model Movie {
 
 model Genre {
   id          String  @id @default(cuid())
-  tmdbId      Int? @unique
+  tmdbId      Int?    @unique
   name        String  @unique
   description String?
   movies      Movie[]
@@ -66,7 +65,7 @@ model MoviePerson {
 
   @@unique([movieId, personId, role])
 }
- 
+
 enum OrderStatus {
   PENDING
   PAID
@@ -78,11 +77,23 @@ model Order {
   totalAmount Int
   status      OrderStatus @default(PENDING)
   createdAt   DateTime    @default(now())
-  items       OrderItem[]
-  userId      String
-  addressId   String
-  user        User        @relation(fields: [userId], references: [id])
-  address     Address     @relation(fields: [addressId], references: [id])
+
+  // Optional user relation (supports guest checkout)
+  userId String?
+  user   User? @relation(fields: [userId], references: [id])
+
+  // Customer information
+  customerName  String
+  customerEmail String
+
+  // Shipping information saved at the time of purchase
+  shippingName       String
+  shippingStreet     String
+  shippingPostalCode String
+  shippingCity       String
+  shippingCountry    String @default("Sweden")
+
+  items OrderItem[]
 }
 
 model OrderItem {
@@ -96,17 +107,17 @@ model OrderItem {
 }
 
 model Address {
-  id         String  @id @default(cuid())
+  id         String @id @default(cuid())
   name       String
   street     String
   city       String
   postalCode String
-  country    String
-  orders     Order[]
-  userId     String
-  user       User    @relation(fields: [userId], references: [id])
+  country    String @default("Sweden")
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
 }
- 
+
 model User {
   id            String    @id
   name          String
@@ -120,7 +131,7 @@ model User {
 
   // Added
   orders    Order[]
-  addresses Address[]
+  address Address?
 
   role       String?
   banned     Boolean?  @default(false)
