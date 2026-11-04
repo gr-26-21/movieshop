@@ -41,6 +41,7 @@ export async function GET(request: NextRequest) {
         price: true,
         description: true,
         imageUrl: true,
+        stock: true,
       },
     });
 

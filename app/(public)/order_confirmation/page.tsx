@@ -109,7 +109,7 @@ export default function OrderConfirmationPage() {
             </CardHeader>
 
             <CardContent className="grid gap-2">
-              <p>{order.customer.name}</p>
+              <p>{order.customer.shippingName}</p>
               <p>{order.customer.address}</p>
               <p>
                 {order.customer.postcode} {order.customer.city}

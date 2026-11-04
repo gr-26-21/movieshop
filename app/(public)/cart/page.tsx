@@ -8,7 +8,7 @@ import CartItemCard from "@/components/cart-item";
 import { useEffect, useRef } from "react";
 
 export default function CartPage() {
-  const { cart, isLoaded, loadError } = useCart();
+  const { cart, isLoaded, loadError, stockNotices } = useCart();
 
   const previousCartIds = useRef(cart.map((item) => item.id));
 
@@ -62,6 +62,24 @@ export default function CartPage() {
       <h1 className="mb-6 text-3xl font-bold text-foreground">Shopping Cart</h1>
 
       <CheckoutProgress currentStep={1} />
+
+      {isLoaded && !loadError && stockNotices.length > 0 && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="my-4 rounded-lg border border-amber-500 p-4"
+        >
+          <h2 className="mb-2 font-semibold">Stock availability has changed</h2>
+
+          {stockNotices.map((notice) => (
+            <p key={notice.productId} className="mb-2 last:mb-0">
+              {notice.availableQuantity === 0
+                ? `${notice.title} is out of stock and has been removed from your cart.`
+                : `You had ${notice.requestedQuantity} copies of ${notice.title} in your cart, but only ${notice.availableQuantity} are available. The quantity has been updated.`}
+            </p>
+          ))}
+        </div>
+      )}
 
       {/* Visar antingen tom varukorg eller produktlistan. */}
 

@@ -22,6 +22,7 @@ type CheckoutFormProps = {
  */
 export default function CheckoutForm({ onCheckout }: CheckoutFormProps) {
   const [name, setName] = useState("");
+  const [shippingName, setShippingName] = useState("");
   const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
   const [postcode, setPostcode] = useState("");
@@ -69,6 +70,7 @@ export default function CheckoutForm({ onCheckout }: CheckoutFormProps) {
 
     const result = checkoutSchema.safeParse({
       name,
+      shippingName,
       email,
       address,
       postcode,
@@ -80,6 +82,7 @@ export default function CheckoutForm({ onCheckout }: CheckoutFormProps) {
 
       setErrors({
         name: fieldErrors.name?.[0],
+        shippingName: fieldErrors.shippingName?.[0],
         email: fieldErrors.email?.[0],
         address: fieldErrors.address?.[0],
         postcode: fieldErrors.postcode?.[0],
@@ -89,6 +92,7 @@ export default function CheckoutForm({ onCheckout }: CheckoutFormProps) {
       // Flytta fokus till det första fältet som har ett fel.
       const fieldOrder = [
         "name",
+        "shippingName",
         "email",
         "address",
         "postcode",
@@ -143,6 +147,36 @@ export default function CheckoutForm({ onCheckout }: CheckoutFormProps) {
         {errors.name && (
           <p id="name-error" role="alert" className="text-sm text-destructive">
             {errors.name}
+          </p>
+        )}
+      </div>
+
+      <div className="grid gap-[0.35rem]">
+        <Label htmlFor="shippingName">Shipping Recipient Name</Label>
+        <Input
+          id="shippingName"
+          name="shippingName"
+          type="text"
+          autoComplete="shipping name"
+          value={shippingName}
+          onChange={(event) => {
+            const value = event.target.value;
+            setShippingName(value);
+            validateField("shippingName", value);
+          }}
+          aria-invalid={Boolean(errors.shippingName)}
+          aria-describedby={
+            errors.shippingName ? "shippingName-error" : undefined
+          }
+          required
+        />
+        {errors.shippingName && (
+          <p
+            id="shippingName-error"
+            role="alert"
+            className="text-sm text-destructive"
+          >
+            {errors.shippingName}
           </p>
         )}
       </div>

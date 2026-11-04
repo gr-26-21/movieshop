@@ -63,6 +63,7 @@ export default function CartItemCard({ item }: CartItemProps) {
               variant="outline"
               size="icon"
               onClick={() => increaseQuantity(item.id)}
+              disabled={item.quantity >= item.stock}
               aria-label={`Increase quantity for ${item.title}`}
             >
               <Plus aria-hidden="true" />

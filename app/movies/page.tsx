@@ -73,6 +73,7 @@ export default async function MoviesPage() {
                 price: movie.price,
                 description: movie.description,
                 imageUrl: movie.imageUrl,
+                stock: movie.stock,
               }}
               disabled={movie.stock <= 0}
             />

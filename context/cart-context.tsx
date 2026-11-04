@@ -20,6 +20,13 @@ type StoredCartItem = {
   quantity: number;
 };
 
+export type StockNotice = {
+  productId: string;
+  title: string;
+  requestedQuantity: number;
+  availableQuantity: number;
+};
+
 /**
  * Funktioner och data som delas genom CartContext.
  */
@@ -27,6 +34,7 @@ type CartContextType = {
   cart: CartItem[];
   isLoaded: boolean;
   loadError: string | null;
+  stockNotices: StockNotice[];
   addToCart: (product: Product) => void;
   increaseQuantity: (productId: string) => void;
   decreaseQuantity: (productId: string) => void;
@@ -107,6 +115,7 @@ export function CartProvider({ children }: CartProviderProps) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [stockNotices, setStockNotices] = useState<StockNotice[]>([]);
 
   /**
    * Läser cookien när komponenten monteras.
@@ -149,14 +158,39 @@ export function CartProvider({ children }: CartProviderProps) {
 
         const movies: Product[] = await response.json();
 
+        const notices: StockNotice[] = [];
+
+        for (const movie of movies) {
+          const saved = savedItems.find((item) => item.id === movie.id);
+
+          if (saved && saved.quantity > movie.stock) {
+            notices.push({
+              productId: movie.id,
+              title: movie.title,
+              requestedQuantity: saved.quantity,
+              availableQuantity: movie.stock,
+            });
+          }
+        }
+
         const restoredCart: CartItem[] = movies.flatMap((movie) => {
           const saved = savedItems.find((item) => item.id === movie.id);
 
-          return saved ? [{ ...movie, quantity: saved.quantity }] : [];
+          if (!saved || movie.stock <= 0) {
+            return [];
+          }
+
+          return [
+            {
+              ...movie,
+              quantity: Math.min(saved.quantity, movie.stock),
+            },
+          ];
         });
 
         if (!cancelled) {
           setCart(restoredCart);
+          setStockNotices(notices);
           setIsLoaded(true);
         }
       } catch (error) {
@@ -202,12 +236,24 @@ export function CartProvider({ children }: CartProviderProps) {
    */
   function addToCart(product: Product) {
     setCart((currentCart) => {
+      if (product.stock <= 0) {
+        return currentCart;
+      }
+
       const existingItem = currentCart.find((item) => item.id === product.id);
 
       if (existingItem) {
+        if (existingItem.quantity >= product.stock) {
+          return currentCart;
+        }
+
         return currentCart.map((item) =>
           item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
+            ? {
+                ...item,
+                stock: product.stock,
+                quantity: item.quantity + 1,
+              }
             : item
         );
       }
@@ -222,7 +268,9 @@ export function CartProvider({ children }: CartProviderProps) {
   function increaseQuantity(productId: string) {
     setCart((currentCart) =>
       currentCart.map((item) =>
-        item.id === productId ? { ...item, quantity: item.quantity + 1 } : item
+        item.id === productId && item.quantity < item.stock
+          ? { ...item, quantity: item.quantity + 1 }
+          : item
       )
     );
   }
@@ -267,6 +315,7 @@ export function CartProvider({ children }: CartProviderProps) {
         clearCart,
         isLoaded,
         loadError,
+        stockNotices,
       }}
     >
       {children}

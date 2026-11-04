@@ -9,4 +9,5 @@ export type Product = {
   price: number;
   description: string;
   imageUrl: string | null;
+  stock: number;
 };
