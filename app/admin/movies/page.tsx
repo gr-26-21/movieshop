@@ -12,14 +12,22 @@ export default async function MoviesPage(){
     orderBy: [
       { updatedAt: "desc" }, { createdAt: "desc" }],
   });
- 
   return (
-    
         <div className="space-y-2 p-6">
-      <h1 className="text-3xl font-bold">Movies Page</h1>
+      <h1 className="text-3xl font-bold">Movies Page</h1> 
       <h2 className="text-xl font-semibold">This is the Movies page.</h2>
-   
+                     <Link
+                    href={`/admin/movies/create`}
+                    className={buttonVariants({
+                      variant: "secondary",
+                      size: "lg",
+                    })}
+                  >
+                    + Create Movie
+                  </Link>
+                  <br />
    <div className="grid grid-cols-3 gap-2">
+    
     {movies.map((movie) => (
       <Card key={movie.id}>
         <CardHeader>
