@@ -1,9 +1,22 @@
 import { NextResponse } from "next/server";
 import { createOrderSchema } from "@/lib/schemas/order.schema";
 import prisma from "@/lib/prisma";
+import { Prisma } from "@/generated/prisma/client";
 
 export async function POST(request: Request) {
   let body: unknown;
+  const idempotencyKey = request.headers.get("Idempotency-Key");
+  if (
+    !idempotencyKey ||
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+      idempotencyKey
+    )
+  ) {
+    return NextResponse.json(
+      { error: "A valid Idempotency-Key is required." },
+      { status: 400 }
+    );
+  }
 
   try {
     body = await request.json();
@@ -24,67 +37,327 @@ export async function POST(request: Request) {
   }
 
   const movieIds = result.data.items.map((item) => item.id);
-
-  let movies;
-
+  const customer = result.data.customer;
   try {
-    movies = await prisma.movie.findMany({
+    const existingOrder = await prisma.order.findUnique({
       where: {
-        id: {
-          in: movieIds,
-        },
+        idempotencyKey,
       },
       select: {
         id: true,
-        stock: true,
-        price: true,
+        customerName: true,
+        customerEmail: true,
+        shippingName: true,
+        shippingStreet: true,
+        shippingPostalCode: true,
+        shippingCity: true,
+        totalAmount: true,
+        status: true,
+        items: {
+          select: {
+            movieId: true,
+            quantity: true,
+            priceAtPurchase: true,
+          },
+        },
       },
     });
-  } catch (error) {
-    console.error("Failed to fetch movies for order:", error);
+
+    if (existingOrder) {
+      const sameCustomer =
+        existingOrder.customerName === customer.name &&
+        existingOrder.customerEmail === customer.email &&
+        existingOrder.shippingName === customer.name &&
+        existingOrder.shippingStreet === customer.address &&
+        existingOrder.shippingPostalCode === customer.postcode &&
+        existingOrder.shippingCity === customer.city;
+
+      const sameItems =
+        existingOrder.items.length === result.data.items.length &&
+        result.data.items.every((item) =>
+          existingOrder.items.some(
+            (savedItem) =>
+              savedItem.movieId === item.id &&
+              savedItem.quantity === item.quantity
+          )
+        );
+      if (!sameCustomer || !sameItems) {
+        return NextResponse.json(
+          { error: "This idempotency key belongs to a different order." },
+          { status: 409 }
+        );
+      }
+
+      return NextResponse.json(
+        {
+          success: true,
+          message: "Order already exists.",
+          order: {
+            id: existingOrder.id,
+            totalAmount: existingOrder.totalAmount,
+            status: existingOrder.status,
+            items: existingOrder.items,
+          },
+        },
+        { status: 200 }
+      );
+    }
+
+    const order = await prisma.$transaction(async (tx) => {
+      const transactionMovies = await tx.movie.findMany({
+        where: {
+          id: {
+            in: movieIds,
+          },
+        },
+        select: {
+          id: true,
+          price: true,
+          stock: true,
+        },
+      });
+
+      if (transactionMovies.length !== movieIds.length) {
+        throw new Error("MOVIE_NOT_FOUND");
+      }
+
+      const totalAmount = result.data.items.reduce((total, item) => {
+        const movie = transactionMovies.find((movie) => movie.id === item.id);
+
+        if (!movie) {
+          throw new Error("MOVIE_NOT_FOUND");
+        }
+
+        return total + movie.price * item.quantity;
+      }, 0);
+
+      for (const item of result.data.items) {
+        const updated = await tx.movie.updateMany({
+          where: {
+            id: item.id,
+            stock: {
+              gte: item.quantity,
+            },
+          },
+          data: {
+            stock: {
+              decrement: item.quantity,
+            },
+          },
+        });
+
+        if (updated.count !== 1) {
+          throw new Error("INSUFFICIENT_STOCK");
+        }
+      }
+
+      return tx.order.create({
+        data: {
+          idempotencyKey,
+          customerName: customer.name,
+          customerEmail: customer.email,
+          shippingName: customer.name,
+          shippingStreet: customer.address,
+          shippingPostalCode: customer.postcode,
+          shippingCity: customer.city,
+          totalAmount,
+          items: {
+            create: result.data.items.map((item) => {
+              const movie = transactionMovies.find(
+                (movie) => movie.id === item.id
+              );
+
+              if (!movie) {
+                throw new Error("MOVIE_NOT_FOUND");
+              }
+
+              return {
+                movieId: item.id,
+                quantity: item.quantity,
+                priceAtPurchase: movie.price,
+              };
+            }),
+          },
+        },
+        select: {
+          id: true,
+          totalAmount: true,
+          status: true,
+          items: {
+            select: {
+              movieId: true,
+              quantity: true,
+              priceAtPurchase: true,
+            },
+          },
+        },
+      });
+    });
 
     return NextResponse.json(
       {
-        error: "Unable to process the order right now. Please try again later.",
+        success: true,
+        message: "Order created successfully.",
+        order,
       },
-      { status: 503 }
+      { status: 201 }
     );
-  }
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002" &&
+      Array.isArray(error.meta?.target) &&
+      error.meta.target.includes("idempotencyKey")
+    ) {
+      const existingOrder = await prisma.order.findUnique({
+        where: { idempotencyKey },
+        select: {
+          id: true,
+          customerName: true,
+          customerEmail: true,
+          shippingName: true,
+          shippingStreet: true,
+          shippingPostalCode: true,
+          shippingCity: true,
+          totalAmount: true,
+          status: true,
+          items: {
+            select: {
+              movieId: true,
+              quantity: true,
+              priceAtPurchase: true,
+            },
+          },
+        },
+      });
 
-  if (movies.length !== movieIds.length) {
-    return NextResponse.json(
-      { error: "One or more movies could not be found." },
-      { status: 400 }
-    );
-  }
+      if (!existingOrder) {
+        return NextResponse.json(
+          { error: "Unable to retrieve the existing order. Please try again." },
+          { status: 503 }
+        );
+      }
 
-  for (const item of result.data.items) {
-    const movie = movies.find((movie) => movie.id === item.id);
+      const sameCustomer =
+        existingOrder.customerName === customer.name &&
+        existingOrder.customerEmail === customer.email &&
+        existingOrder.shippingName === customer.name &&
+        existingOrder.shippingStreet === customer.address &&
+        existingOrder.shippingPostalCode === customer.postcode &&
+        existingOrder.shippingCity === customer.city;
 
-    if (movie && item.quantity > movie.stock) {
+      const sameItems =
+        existingOrder.items.length === result.data.items.length &&
+        result.data.items.every((item) =>
+          existingOrder.items.some(
+            (savedItem) =>
+              savedItem.movieId === item.id &&
+              savedItem.quantity === item.quantity
+          )
+        );
+
+      if (!sameCustomer || !sameItems) {
+        return NextResponse.json(
+          { error: "This idempotency key belongs to a different order." },
+          { status: 409 }
+        );
+      }
+
       return NextResponse.json(
         {
-          error: "Not enough stock available.",
-          movieId: item.id,
-          requestedQuantity: item.quantity,
-          availableStock: movie.stock,
+          success: true,
+          message: "Order already exists.",
+          order: {
+            id: existingOrder.id,
+            totalAmount: existingOrder.totalAmount,
+            status: existingOrder.status,
+            items: existingOrder.items,
+          },
         },
+        { status: 200 }
+      );
+    }
+    if (error instanceof Error && error.message === "MOVIE_NOT_FOUND") {
+      return NextResponse.json(
+        { error: "One or more movies could not be found." },
         { status: 400 }
       );
     }
+
+    if (error instanceof Error && error.message === "INSUFFICIENT_STOCK") {
+      const existingOrder = await prisma.order.findUnique({
+        where: { idempotencyKey },
+        select: {
+          id: true,
+          customerName: true,
+          customerEmail: true,
+          shippingName: true,
+          shippingStreet: true,
+          shippingPostalCode: true,
+          shippingCity: true,
+          totalAmount: true,
+          status: true,
+          items: {
+            select: {
+              movieId: true,
+              quantity: true,
+              priceAtPurchase: true,
+            },
+          },
+        },
+      });
+      if (existingOrder) {
+        const sameCustomer =
+          existingOrder.customerName === customer.name &&
+          existingOrder.customerEmail === customer.email &&
+          existingOrder.shippingName === customer.name &&
+          existingOrder.shippingStreet === customer.address &&
+          existingOrder.shippingPostalCode === customer.postcode &&
+          existingOrder.shippingCity === customer.city;
+
+        const sameItems =
+          existingOrder.items.length === result.data.items.length &&
+          result.data.items.every((item) =>
+            existingOrder.items.some(
+              (savedItem) =>
+                savedItem.movieId === item.id &&
+                savedItem.quantity === item.quantity
+            )
+          );
+
+        if (sameCustomer && sameItems) {
+          return NextResponse.json(
+            {
+              success: true,
+              message: "Order already exists.",
+              order: {
+                id: existingOrder.id,
+                totalAmount: existingOrder.totalAmount,
+                status: existingOrder.status,
+                items: existingOrder.items,
+              },
+            },
+            { status: 200 }
+          );
+        }
+
+        return NextResponse.json(
+          { error: "This idempotency key belongs to a different order." },
+          { status: 409 }
+        );
+      }
+
+      return NextResponse.json(
+        { error: "Not enough stock available." },
+        { status: 409 }
+      );
+    }
+
+    console.error("Failed to create order:", error);
+
+    return NextResponse.json(
+      { error: "Unable to create the order. Please try again later." },
+      { status: 503 }
+    );
   }
-
-  const totalAmount = result.data.items.reduce((total, item) => {
-    const movie = movies.find((movie) => movie.id === item.id);
-
-    if (!movie) return total;
-
-    return total + movie.price * item.quantity;
-  }, 0);
-
-  return NextResponse.json({
-    success: true,
-    message: "Order data validated successfully.",
-    totalAmount,
-  });
 }
