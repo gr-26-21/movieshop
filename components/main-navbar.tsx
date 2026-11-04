@@ -18,22 +18,6 @@ export default async function MainNavbar() {
         <Link href={"/"}>
           <h1 className="text-3xl">MovieShop</h1>
         </Link>
-{session?.user?.id && (
-  <>
-    {/* TEMPORARY - Admin Panel */}
-    <Link href="/admin">
-      <h1
-        className="text-xl"
-        style={{
-          color: "#10b981",
-          textShadow: "0 0 5px #10b981, 0 0 10px #10b981, 0 0 20px #059669",
-        }}
-      >
-        Temporary button to Admin Panel
-      </h1>
-    </Link>
-  </>
-)}
       </div>
       {/* sign-in, sign-up */}
       <div className="flex gap-2">
