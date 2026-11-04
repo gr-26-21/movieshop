@@ -74,6 +74,7 @@ enum OrderStatus {
 
 model Order {
   id          String      @id @default(cuid())
+  idempotencyKey String? @unique
   totalAmount Int
   status      OrderStatus @default(PENDING)
   createdAt   DateTime    @default(now())
