@@ -127,6 +127,18 @@ export async function POST(request: Request) {
         throw new Error("MOVIE_NOT_FOUND");
       }
 
+      for (const item of result.data.items) {
+        const movie = transactionMovies.find((movie) => movie.id === item.id);
+
+        if (!movie) {
+          throw new Error("MOVIE_NOT_FOUND");
+        }
+
+        if (movie.price !== item.expectedPrice) {
+          throw new Error("PRICE_CHANGED");
+        }
+      }
+
       const totalAmount = result.data.items.reduce((total, item) => {
         const movie = transactionMovies.find((movie) => movie.id === item.id);
 
@@ -285,6 +297,16 @@ export async function POST(request: Request) {
           },
         },
         { status: 200 }
+      );
+    }
+    if (error instanceof Error && error.message === "PRICE_CHANGED") {
+      return NextResponse.json(
+        {
+          code: "PRICE_CHANGED",
+          error:
+            "A movie price has changed. Please reload checkout to review the updated total before trying again.",
+        },
+        { status: 409 }
       );
     }
     if (error instanceof Error && error.message === "MOVIE_NOT_FOUND") {

@@ -41,6 +41,7 @@ export default function CheckoutPage() {
         items: cart.map((item) => ({
           id: item.id,
           quantity: item.quantity,
+          expectedPrice: item.price,
         })),
       };
 
