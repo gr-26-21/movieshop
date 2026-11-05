@@ -266,7 +266,7 @@ export default function CheckoutForm({ onCheckout }: CheckoutFormProps) {
       </p>
 
       <Button
-        className="my-4 w-full"
+        className="my-4 w-full focus-visible:ring-0 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-black focus-visible:outline-solid dark:focus-visible:outline-white"
         type="submit"
         disabled={isSubmitting}
         aria-busy={isSubmitting}
