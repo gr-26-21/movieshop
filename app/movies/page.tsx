@@ -62,7 +62,7 @@ export default async function MoviesPage() {
             </p>
 
             <CardDescription>
-              {movie.stock > 0 ? "In stock" : "Out of stock"}
+              {movie.stock > 0 ? `In stock: ${movie.stock}` : "Out of stock"}
             </CardDescription>
           </CardContent>
           <CardFooter className="justify-end">
