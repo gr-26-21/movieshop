@@ -1,9 +1,12 @@
 import { z } from "zod";
 import { checkoutSchema } from "@/lib/schemas/checkout.schema";
 
-
 export const orderItemSchema = z.object({
   id: z.string().min(1, "Movie ID is required."),
+  expectedPrice: z
+    .number()
+    .int("Price must be a whole number.")
+    .nonnegative("Price cannot be negative."),
   quantity: z
     .number()
     .int("Quantity must be a whole number.")
