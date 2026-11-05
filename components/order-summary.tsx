@@ -46,7 +46,7 @@ export default function OrderSummary() {
                 </span>
 
                 {/* Antal */}
-                <span className="col-span-2 text-left tabular-nums min-[480px]:col-span-1 min-[480px]:text-center">
+                <span className="col-span-2 text-left whitespace-nowrap tabular-nums min-[480px]:col-span-1 min-[480px]:text-center">
                   <span className="min-[480px]:hidden">Quantity: </span>
                   {item.quantity}
                 </span>

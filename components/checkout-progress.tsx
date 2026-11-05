@@ -43,7 +43,7 @@ export function CheckoutProgress({ currentStep }: CheckoutProgressProps) {
               <Link key={step.label} href={step.href} className={className}>
                 {stepNumber === 3 ? (
                   <>
-                    <span className="sm:hidden">Confirmation</span>
+                    <span className="sm:hidden">Done</span>
                     <span className="hidden sm:inline">Order Confirmation</span>
                   </>
                 ) : (
@@ -61,7 +61,7 @@ export function CheckoutProgress({ currentStep }: CheckoutProgressProps) {
             >
               {stepNumber === 3 ? (
                 <>
-                  <span className="sm:hidden">Confirmation</span>
+                  <span className="sm:hidden">Done</span>
                   <span className="hidden sm:inline">Order Confirmation</span>
                 </>
               ) : (
