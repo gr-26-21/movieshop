@@ -252,8 +252,12 @@ export default function CheckoutForm({ onCheckout }: CheckoutFormProps) {
         )}
       </div>
 
+      <p className="text-sm text-muted-foreground">
+        This is a simulated payment. No money will be charged.
+      </p>
+
       <Button className="my-4 w-full" type="submit">
-        Place Order
+        Complete simulated payment
       </Button>
     </form>
   );

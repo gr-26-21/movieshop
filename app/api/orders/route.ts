@@ -2,8 +2,12 @@ import { NextResponse } from "next/server";
 import { createOrderSchema } from "@/lib/schemas/order.schema";
 import prisma from "@/lib/prisma";
 import { Prisma } from "@/generated/prisma/client";
+import { auth } from "@/lib/auth";
 
 export async function POST(request: Request) {
+  const session = await auth.api.getSession({
+    headers: request.headers,
+  });
   let body: unknown;
   const idempotencyKey = request.headers.get("Idempotency-Key");
   if (
@@ -45,6 +49,7 @@ export async function POST(request: Request) {
       },
       select: {
         id: true,
+        userId: true,
         customerName: true,
         customerEmail: true,
         shippingName: true,
@@ -65,6 +70,7 @@ export async function POST(request: Request) {
 
     if (existingOrder) {
       const sameCustomer =
+        existingOrder.userId === (session?.user.id ?? null) &&
         existingOrder.customerName === customer.name &&
         existingOrder.customerEmail === customer.email &&
         existingOrder.shippingName === customer.name &&
@@ -154,6 +160,8 @@ export async function POST(request: Request) {
       return tx.order.create({
         data: {
           idempotencyKey,
+          userId: session?.user.id ?? null,
+          status: "PAID",
           customerName: customer.name,
           customerEmail: customer.email,
           shippingName: customer.name,
@@ -213,6 +221,7 @@ export async function POST(request: Request) {
         where: { idempotencyKey },
         select: {
           id: true,
+          userId: true,
           customerName: true,
           customerEmail: true,
           shippingName: true,
@@ -239,6 +248,7 @@ export async function POST(request: Request) {
       }
 
       const sameCustomer =
+        existingOrder.userId === (session?.user.id ?? null) &&
         existingOrder.customerName === customer.name &&
         existingOrder.customerEmail === customer.email &&
         existingOrder.shippingName === customer.name &&
@@ -289,6 +299,7 @@ export async function POST(request: Request) {
         where: { idempotencyKey },
         select: {
           id: true,
+          userId: true,
           customerName: true,
           customerEmail: true,
           shippingName: true,
@@ -308,6 +319,7 @@ export async function POST(request: Request) {
       });
       if (existingOrder) {
         const sameCustomer =
+          existingOrder.userId === (session?.user.id ?? null) &&
           existingOrder.customerName === customer.name &&
           existingOrder.customerEmail === customer.email &&
           existingOrder.shippingName === customer.name &&

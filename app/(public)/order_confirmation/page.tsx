@@ -103,7 +103,9 @@ export default function OrderConfirmationPage() {
             </p>
           )}
 
-          <p>No payment has been made. Your order is awaiting processing.</p>
+          <p>
+            Your simulated payment was successful. No money has been charged.
+          </p>
 
           {/* Kundens leveransuppgifter */}
           <Card className="my-8 rounded-xl border border-border bg-muted p-5">
