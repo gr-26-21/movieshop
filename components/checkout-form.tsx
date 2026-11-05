@@ -11,7 +11,7 @@ import {
 } from "@/lib/schemas/checkout.schema";
 
 type CheckoutFormProps = {
-  onCheckout: (customer: CheckoutFormData) => void;
+  onCheckout: (customer: CheckoutFormData) => Promise<void>;
 };
 
 /**
@@ -36,6 +36,7 @@ export default function CheckoutForm({ onCheckout }: CheckoutFormProps) {
    * Efter första försöket kan fälten valideras medan användaren skriver.
    */
   const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   /**
    * Validerar ett fält med Zod när användaren ändrar värdet.
@@ -61,8 +62,10 @@ export default function CheckoutForm({ onCheckout }: CheckoutFormProps) {
    * Validerar formuläret vid beställning.
    */
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (isSubmitting) return;
 
     // Markera att användaren har försökt skicka formuläret.
     setHasSubmitted(true);
@@ -114,7 +117,13 @@ export default function CheckoutForm({ onCheckout }: CheckoutFormProps) {
     setErrors({});
 
     // Fortsätt till befintlig beställningshantering.
-    onCheckout(result.data);
+    setIsSubmitting(true);
+
+    try {
+      await onCheckout(result.data);
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -256,8 +265,13 @@ export default function CheckoutForm({ onCheckout }: CheckoutFormProps) {
         This is a simulated payment. No money will be charged.
       </p>
 
-      <Button className="my-4 w-full" type="submit">
-        Complete simulated payment
+      <Button
+        className="my-4 w-full"
+        type="submit"
+        disabled={isSubmitting}
+        aria-busy={isSubmitting}
+      >
+        {isSubmitting ? "Processing…" : "Complete simulated payment"}
       </Button>
     </form>
   );
