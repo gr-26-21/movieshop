@@ -7,6 +7,7 @@ import MainNavbar from "@/components/main-navbar";
 import { Toaster } from "@/components/ui/toast";
 import { CartProvider } from "@/context/cart-context";
 import type { Metadata } from "next";
+import StoreNavigation from "@/components/store-navigation";
 
 export const metadata: Metadata = {
   title: {
@@ -42,8 +43,10 @@ export default function RootLayout({
       <body>
         <ThemeProvider>
           <CartProvider>
+            <StoreNavigation>
+              <MainNavbar />
+            </StoreNavigation>
             {children}
-            <MainNavbar />
             <Toaster />
           </CartProvider>
         </ThemeProvider>
