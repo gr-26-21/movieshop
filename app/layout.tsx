@@ -42,8 +42,8 @@ export default function RootLayout({
       <body>
         <ThemeProvider>
           <CartProvider>
-            <MainNavbar />
             {children}
+            <MainNavbar />
             <Toaster />
           </CartProvider>
         </ThemeProvider>
