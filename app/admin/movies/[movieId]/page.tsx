@@ -20,16 +20,13 @@ export default async function MovieDetailsPage(
       id: movieId,
       deletedAt: null,
     },
+include: {
+  persons: {
     include: {
-      persons: {
-        where: {
-          role: "ACTOR",
-        },
-        include: {
-          person: true,
-        },
-      },
+      person: true,
     },
+  },
+  },
   });
 
   // show a 404 page if movie doesnt exist or if its been deleted
