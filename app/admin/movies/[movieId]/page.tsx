@@ -42,9 +42,20 @@ include: {
         {movie.title}
       </h1>
 
+
+            <h2 className="text-xl font-semibold">
+        Directors
+
+        {/* if result < 0 display:  No directors added */}
+      </h2>
+
       <h2 className="text-xl font-semibold">
         Actors
+
+        {/* if result < 0 display:  No actors added */}
       </h2>
+
+
 
       <div>
         {/* Map proccesses each actor in the credits array */}
