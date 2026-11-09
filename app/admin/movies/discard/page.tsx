@@ -1,5 +1,7 @@
-
 import prisma from "@/lib/prisma";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -13,20 +15,32 @@ import {
 import RestoreMovieButton from "./_components/restore-movie-button";
 
 export default async function DiscardPage() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) {
+    redirect("/login");
+  }
+
+  const roles =
+    session.user.role?.split(",").map((role) => role.trim()) ?? [];
+
+  if (!roles.includes("admin")) {
+    redirect("/");
+  }
+
+  // Get discarded movies
   const deletedMovies = await prisma.movie.findMany({
     where: {
       deletedAt: {
         not: null,
-        
       },
     },
     orderBy: {
       deletedAt: "desc",
     },
   });
-
-  // not: null shows all the movies that haven't been deleted.
-  // deletedAt shows movies that have been deleted
 
   return (
     <div className="space-y-6 p-6">
@@ -35,11 +49,12 @@ export default async function DiscardPage() {
       {deletedMovies.length === 0 ? (
         <p>No deleted movies found.</p>
       ) : (
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {deletedMovies.map((movie) => (
             <Card key={movie.id}>
               <CardHeader>
                 <CardTitle>{movie.title}</CardTitle>
+
                 <CardDescription>
                   Deleted:{" "}
                   {movie.deletedAt?.toLocaleDateString("sv-SE")}
@@ -52,9 +67,9 @@ export default async function DiscardPage() {
                 </p>
               </CardContent>
 
-            <CardFooter className="justify-end">
+              <CardFooter className="justify-end">
                 <RestoreMovieButton movieId={movie.id} />
-            </CardFooter>
+              </CardFooter>
             </Card>
           ))}
         </div>
