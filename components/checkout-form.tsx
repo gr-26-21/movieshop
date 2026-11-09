@@ -11,6 +11,7 @@ import {
 } from "@/lib/schemas/checkout.schema";
 
 type CheckoutFormProps = {
+  initialDetails?: CheckoutFormData;
   onCheckout: (customer: CheckoutFormData) => Promise<void>;
 };
 
@@ -20,12 +21,15 @@ type CheckoutFormProps = {
  * Kontrollerar kunduppgifterna innan
  * beställningen skickas vidare.
  */
-export default function CheckoutForm({ onCheckout }: CheckoutFormProps) {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [address, setAddress] = useState("");
-  const [postcode, setPostcode] = useState("");
-  const [city, setCity] = useState("");
+export default function CheckoutForm({
+  initialDetails,
+  onCheckout,
+}: CheckoutFormProps) {
+  const [name, setName] = useState(initialDetails?.name ?? "");
+  const [email, setEmail] = useState(initialDetails?.email ?? "");
+  const [address, setAddress] = useState(initialDetails?.address ?? "");
+  const [postcode, setPostcode] = useState(initialDetails?.postcode ?? "");
+  const [city, setCity] = useState(initialDetails?.city ?? "");
 
   const [errors, setErrors] = useState<
     Partial<Record<keyof CheckoutFormData, string>>
