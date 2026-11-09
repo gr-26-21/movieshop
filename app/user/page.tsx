@@ -42,6 +42,11 @@ export default async function UserPage() {
       createdAt: true,
       totalAmount: true,
       status: true,
+      shippingName: true,
+      shippingStreet: true,
+      shippingPostalCode: true,
+      shippingCity: true,
+      shippingCountry: true,
       items: {
         select: {
           id: true,
@@ -90,20 +95,34 @@ export default async function UserPage() {
       ) : (
         orders.map((order) => (
           <section key={order.id} className="space-y-3 rounded-xl border p-4">
-            <h2 className="font-semibold break-all">Order {order.id}</h2>
+            <h3 className="font-semibold break-all">Order {order.id}</h3>
             <p>{order.createdAt.toLocaleDateString("sv-SE")}</p>
             <p>Status: {order.status}</p>
-
-            <ul className="space-y-2">
-              {order.items.map((item) => (
-                <li key={item.id}>
-                  {item.movie.title} — {item.quantity} × {item.priceAtPurchase}{" "}
-                  kr
-                </li>
-              ))}
-            </ul>
-
             <p className="font-semibold">Total: {order.totalAmount} kr</p>
+
+            <details className="space-y-3">
+              <summary className="w-fit cursor-pointer rounded font-medium underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4">
+                View details
+              </summary>
+
+              <h4 className="font-semibold">Items</h4>
+              <ul className="space-y-2">
+                {order.items.map((item) => (
+                  <li key={item.id}>
+                    {item.movie.title} — {item.quantity} × {item.priceAtPurchase}{" "}
+                    kr
+                  </li>
+                ))}
+              </ul>
+
+              <h4 className="font-semibold">Delivery address</h4>
+              <div className="break-words">
+                <p>{order.shippingName}</p>
+                <p>{order.shippingStreet}</p>
+                <p>{order.shippingPostalCode} {order.shippingCity}</p>
+                <p>{order.shippingCountry}</p>
+              </div>
+            </details>
           </section>
         ))
       )}
