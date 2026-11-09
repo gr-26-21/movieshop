@@ -2,15 +2,20 @@ import UsersTable from "./_components/users-table";
 import UsersSearchForm from "./_components/users-search-form";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import UsersPagination from "./_components/users-pagination";
 
 export default async function UsersPage({
   searchParams,
 }: {
   searchParams: Promise<{
     search?: string;
+    page?: string;
   }>;
 }) {
-  const { search } = await searchParams;
+  const { search, page } = await searchParams;
+
+  const currentPage = Number(page) || 1;
+  const pageSize = 10;
 
   const result = await auth.api.listUsers({
     query: {
@@ -19,6 +24,9 @@ export default async function UsersPage({
       searchOperator: "contains",
       sortBy: "createdAt",
       sortDirection: "desc",
+
+      limit: pageSize,
+      offset: (currentPage - 1) * pageSize,
     },
 
     headers: await headers(),
@@ -35,6 +43,13 @@ export default async function UsersPage({
         </div>
         <div className="rounded-2xl border p-5">
           <UsersTable users={result.users} />
+        </div>
+        <div>
+          <UsersPagination
+            currentPage={currentPage}
+            totalPages={result.total}
+            search={search}
+          />
         </div>
       </div>
     </>
