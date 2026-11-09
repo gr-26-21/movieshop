@@ -47,7 +47,7 @@ export default async function UsersPage({
         <div>
           <UsersPagination
             currentPage={currentPage}
-            totalPages={result.total}
+            totalPages={Math.ceil(result.total / pageSize)}
             search={search}
           />
         </div>
