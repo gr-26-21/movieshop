@@ -43,7 +43,7 @@ export async function updateMovie(
   try {
     const data = updateMovieSchema.parse(input);
 
-    const updatedMovie = await prisma.movie.update({
+    await prisma.movie.update({
       where: { id: data.id },
       data: {
         title: data.title,

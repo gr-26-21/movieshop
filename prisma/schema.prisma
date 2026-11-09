@@ -1,5 +1,3 @@
-// GROUP A + B fusion schema.prisma
-
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -22,6 +20,7 @@ model Movie {
   runtime     Int
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
+  deletedAt   DateTime?
   // authorId   Int?
   // directorId Int?
   // author   Author?   @relation(fields: [authorId], references: [id])
@@ -74,14 +73,27 @@ enum OrderStatus {
 
 model Order {
   id          String      @id @default(cuid())
+  idempotencyKey String? @unique
   totalAmount Int
   status      OrderStatus @default(PENDING)
   createdAt   DateTime    @default(now())
-  items       OrderItem[]
-  userId      String
-  addressId   String
-  user        User        @relation(fields: [userId], references: [id])
-  address     Address     @relation(fields: [addressId], references: [id])
+
+  // Optional user relation (supports guest checkout)
+  userId String?
+  user   User? @relation(fields: [userId], references: [id])
+
+  // Customer information
+  customerName  String
+  customerEmail String
+
+  // Shipping information saved at the time of purchase
+  shippingName       String
+  shippingStreet     String
+  shippingPostalCode String
+  shippingCity       String
+  shippingCountry    String @default("Sweden")
+
+  items OrderItem[]
 }
 
 model OrderItem {
@@ -95,15 +107,15 @@ model OrderItem {
 }
 
 model Address {
-  id         String  @id @default(cuid())
+  id         String @id @default(cuid())
   name       String
   street     String
   city       String
   postalCode String
-  country    String
-  orders     Order[]
-  userId     String
-  user       User    @relation(fields: [userId], references: [id])
+  country    String @default("Sweden")
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
 }
 
 model User {
@@ -119,7 +131,7 @@ model User {
 
   // Added
   orders    Order[]
-  addresses Address[]
+  address Address?
 
   role       String?
   banned     Boolean?  @default(false)
