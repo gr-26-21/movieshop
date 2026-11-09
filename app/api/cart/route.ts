@@ -34,6 +34,7 @@ export async function GET(request: NextRequest) {
     const movies = await prisma.movie.findMany({
       where: {
         id: { in: ids },
+        deletedAt: null,
       },
       select: {
         id: true,
