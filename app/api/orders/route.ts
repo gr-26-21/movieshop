@@ -112,6 +112,7 @@ export async function POST(request: Request) {
     const order = await prisma.$transaction(async (tx) => {
       const transactionMovies = await tx.movie.findMany({
         where: {
+          deletedAt: null,
           id: {
             in: movieIds,
           },
@@ -153,6 +154,7 @@ export async function POST(request: Request) {
         const updated = await tx.movie.updateMany({
           where: {
             id: item.id,
+            deletedAt: null,
             stock: {
               gte: item.quantity,
             },
@@ -311,7 +313,7 @@ export async function POST(request: Request) {
     }
     if (error instanceof Error && error.message === "MOVIE_NOT_FOUND") {
       return NextResponse.json(
-        { error: "One or more movies could not be found." },
+        { error: "One or more movies are no longer available. Please reload checkout to update your cart." },
         { status: 400 }
       );
     }

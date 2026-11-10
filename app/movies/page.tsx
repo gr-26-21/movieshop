@@ -13,6 +13,7 @@ import { AddToCartButton } from "@/components/add-to-cart-button";
 
 export default async function MoviesPage() {
   const movies = await prisma.movie.findMany({
+    where: { deletedAt: null },
     include: {
       genres: true,
       persons: {
