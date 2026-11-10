@@ -1,3 +1,17 @@
+//Types for working with tmdb api responses
+
+export type TMDBCreateMovieConversion = {
+  title: string;
+  description: string;
+  price: number;
+  releaseDate: string;
+  imageUrl: string;
+  stock: number;
+  runtime: number;
+} & {
+  tmdbid: number;
+};
+
 export interface TMDBMovieSearchRoot {
   page: number;
   results: TMDBMovieSearchResult[];
@@ -42,7 +56,7 @@ export interface TMDBPersonDetails {
 export interface TMDBMovieCreditsRoot {
   id: number;
   cast: TMDBCastCredits[];
-  crew: TMDBCrewCredists[];
+  crew: TMDBCrewCredits[];
 }
 
 export interface TMDBCastCredits {
@@ -60,7 +74,7 @@ export interface TMDBCastCredits {
   order: number;
 }
 
-export interface TMDBCrewCredists {
+export interface TMDBCrewCredits {
   adult: boolean;
   gender: number;
   id: number;
@@ -103,6 +117,10 @@ export interface TMDBMovieAndCreditsRoot {
   vote_average: number;
   vote_count: number;
   credits: TMDBMovieCreditsRoot;
+}
+
+export interface TMDBGenreRoot {
+  genres: TMDBMovieGenre[];
 }
 
 export interface TMDBMovieGenre {
