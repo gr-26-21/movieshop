@@ -1,6 +1,7 @@
-
 import prisma from "@/lib/prisma";
-import { notFound } from "next/navigation";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { redirect, notFound } from "next/navigation";
 import { buttonVariants } from "@/components/ui/button";
 import Link from "next/link";
 import SoftDeleteMovieButton from "./_components/movie-delete-button";
@@ -8,28 +9,42 @@ import SoftDeleteMovieButton from "./_components/movie-delete-button";
 export default async function MovieDetailsPage(
   props: PageProps<"/admin/movies/[movieId]">
 ) {
+  // Control login
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) {
+    redirect("/login");
+  }
+
+  // Control admin login
+  const roles = session.user.role?.split(",").map((role) => role.trim()) ?? [];
+
+  if (!roles.includes("admin")) {
+    redirect("/");
+  }
+
+  // Get movie ID
   const params = await props.params;
   const movieId = params.movieId;
 
- // Find movie ID and include it if not deleted yet
- // Retrieve ACTOR 
- // Person: true will retrieve associated Person to get name of person
- // Commented version is down below if clashing with TMDB
+  // Get movie if it's not discarded
   const movie = await prisma.movie.findFirst({
     where: {
       id: movieId,
       deletedAt: null,
     },
-include: {
-  persons: {
     include: {
-      person: true,
+      persons: {
+        include: {
+          person: true,
+        },
+      },
     },
-  },
-  },
   });
 
-  // show a 404 page if movie doesnt exist or if its been deleted
+  // 404 if movie is not existing or discarded
   if (!movie) {
     notFound();
   }
@@ -38,29 +53,14 @@ include: {
 
   return (
     <div className="space-y-2 p-6">
-      <h1 className="text-3xl font-bold">
-        {movie.title}
-      </h1>
+      <h1 className="text-3xl font-bold">{movie.title}</h1>
 
+      <h2 className="text-xl font-semibold">Directors</h2>
+      {/* if result < 0 display:  No directors added */}
 
-            <h2 className="text-xl font-semibold">
-        Directors
-
-        {/* if result < 0 display:  No directors added */}
-      </h2>
-
-      <h2 className="text-xl font-semibold">
-        Actors
-
-        {/* if result < 0 display:  No actors added */}
-      </h2>
-
-
-
+      <h2 className="text-xl font-semibold">Actors</h2>
+      {/* if result < 0 display:  No actors added */}
       <div>
-        {/* Map proccesses each actor in the credits array */}
-        {/* key is used to render lists (from result.id relationship records) */}
-        {/* Display persons name - and role (Leonardo Dicaprio - ACTOR ) */}
         {credits.map((result) => (
           <div key={result.id}>
             {result.person.name} - {result.role}
@@ -79,9 +79,7 @@ include: {
         <SoftDeleteMovieButton movieId={movie.id} />
       </div>
 
-      <p className="max-w-prose whitespace-pre-line">
-        {movie.description}
-      </p>
+      <p className="max-w-prose whitespace-pre-line">{movie.description}</p>
     </div>
   );
 }
@@ -101,8 +99,6 @@ include: {
 //   const params = await props.params;
 //   const movieId = params.movieId;
 
-
-  
 //   const movie = await prisma.movie.findUnique({
 //     where: { id: movieId },
 //     include: {
@@ -125,8 +121,6 @@ include: {
 //       }
 //     })
 //   });
-
-
 
 //   return (
 //     <div className="space-y-2 p-6">
