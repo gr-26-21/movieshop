@@ -2,8 +2,28 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Film, ShoppingCart, Users, Wallet } from "lucide-react";
 import UserCounter from "./_components/user-counter";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
+import { canAccessAdmin } from "@/lib/check-permissions";
 
-export default function AdminDashboard() {
+
+
+export default async function AdminDashboard() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) {
+    redirect("/login");
+  }
+
+  const allowed = await canAccessAdmin(session.user.id);
+
+  if (!allowed) {
+    redirect("/");
+  }
+
   return (
     <>
       <div className="mx-auto grid max-w-6xl gap-5 sm:grid-cols-2">
