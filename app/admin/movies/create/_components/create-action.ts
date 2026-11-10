@@ -3,6 +3,9 @@
 import { PersonRole } from "@/generated/prisma/enums";
 import prisma from "@/lib/prisma";
 import { TMDBCastCredits, TMDBCrewCredits } from "@/types/tmdb";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 
 const createMovieSchema = z.object({
@@ -22,6 +25,24 @@ type CreateMovieInput = z.input<typeof createMovieSchema>;
 
 //created a movie with input either from a tmdb respone or a manual form
 export async function createMovie(input: CreateMovieInput, tmdbId?: number) {
+  // Control login
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) {
+    return false;
+  }
+
+  // Control Admin role
+  const roles =
+    session.user.role?.split(",").map((role) => role.trim()) ?? [];
+
+  if (!roles.includes("admin")) {
+    return false;
+  }
+
+  //   // Validate information on the server
   const result = createMovieSchema.safeParse(input);
   if (!result.success) {
     return false;

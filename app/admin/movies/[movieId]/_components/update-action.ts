@@ -1,37 +1,25 @@
 "use server";
 
 import prisma from "@/lib/prisma";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import z from "zod";
+import { z } from "zod";
 
-// UPDATE
+// UPDATE SCHEMA
 const updateMovieSchema = z.object({
   id: z.string().min(1, "Please provide a valid movie ID"),
   title: z
-      .string()
-      .min(3, "Title has to be at least 3 characters")
-      .max(75, "Title must be at most 75 characters"),
-  
-    description: z.string().min(1, "Description is required"),
-    price: z.number().min(1, "Price is required"),
-    releaseDate: z.iso.date("Release date is required"),
-    imageUrl: z.string(),
-    stock: z.number().min(1, "Stock is required"),
-    runtime: z.number().min(1, "Runtime is required"),
-//   title: z
-//     .string()
-//     .min(3, "Title has to be at least 3 characters")
-//     .max(75, "Title must be at most 75 characters"),
-
-//   description: z.string().min(1, "Description is required"),
-//   price: z.number().min(1, "Price is required"),
-//   releaseDate: z.iso.date("Release date is required"),
-//   imageUrl: z.string().min(1, "Image URL is required"),
-//   stock: z.string().min(1, "Stock is required"),
-//   runtime: z.string().min(1, "Runtime is required"),
-//   // person: z.string().min(1, "Person is required"),
-//   // director: z.string().min(1, "Director is required"),
+    .string()
+    .min(3, "Title has to be at least 3 characters")
+    .max(75, "Title must be at most 75 characters"),
+  description: z.string().min(1, "Description is required"),
+  price: z.number().min(1, "Price is required"),
+  releaseDate: z.iso.date("Release date is required"),
+  imageUrl: z.string(),
+  stock: z.number().min(1, "Stock is required"),
+  runtime: z.number().min(1, "Runtime is required"),
 });
 
 type UpdateMovieInput = z.input<typeof updateMovieSchema>;
@@ -40,99 +28,65 @@ export async function updateMovie(
   input: UpdateMovieInput,
   shouldRedirect = true
 ) {
-  try {
-    const data = updateMovieSchema.parse(input);
+  // Control Login
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
 
-    const updatedMovie = await prisma.movie.update({
-      where: { id: data.id },
+  if (!session) {
+    return false;
+  }
+
+  // Control admin role
+  const roles = session.user.role?.split(",").map((role) => role.trim()) ?? [];
+
+  if (!roles.includes("admin")) {
+    return false;
+  }
+
+  // Validate information on the server
+  const result = updateMovieSchema.safeParse(input);
+
+  if (!result.success) {
+    return false;
+  }
+
+  const data = result.data;
+
+  try {
+    // Only update an active movie
+    const updatedMovie = await prisma.movie.updateMany({
+      where: {
+        id: data.id,
+        deletedAt: null,
+      },
       data: {
         title: data.title,
         description: data.description,
-        price: Number(data.price),
+        price: data.price,
         releaseDate: new Date(data.releaseDate),
         imageUrl: data.imageUrl,
-        stock: Number(data.stock),
-        runtime: Number(data.runtime),
-        // person: data.person, // connectOrCreate with TmdBId: data.tmdbId
+        stock: data.stock,
+        runtime: data.runtime,
       },
     });
-    revalidatePath("/movies");
-    if (shouldRedirect) {
-      redirect(`/movies/${data.id}`);
-    }
 
-    return true;
-  } catch (err) {
-    if (err instanceof z.ZodError) {
+    if (updatedMovie.count === 0) {
       return false;
     }
-    throw err;
+  } catch (error) {
+    console.error("Failed to update movie:", error);
+    return false;
   }
+
+  // Update Cache
+  revalidatePath("/movies");
+  revalidatePath("/admin/movies");
+  revalidatePath(`/admin/movies/${data.id}`);
+
+  if (shouldRedirect) {
+    redirect(`/admin/movies/${data.id}`);
+  }
+
+  return true;
 }
-
-// export async function updateMovie(
-//   input: UpdateMovieInput,
-//   shouldRedirect = true
-// ) {
-//   let data: z.infer<typeof updateMovieSchema>;
-
-//   try {
-//     data = updateMovieSchema.parse(input);
-
-//     const person = await prisma.person.upsert({
-//       where: { name: data.person },
-//       update: {},
-//       create: { name: data.person },
-//     });
-
-// let director = await prisma.director.findFirst({
-//   where: { name: data.director },
-// });
-
-// if (!director) {
-//   director = await prisma.director.create({
-//     data: { name: data.director },
-//   });
-// }
-
-// await prisma.movie.update({
-//   where: { id: data.id },
-//   data: {
-//     title: data.title,
-//     description: data.description,
-//     price: parseInt(data.price),
-//     person: {
-//       connect: {
-//         id: person.id,
-//       },
-//     },
-//     releaseDate: new Date(data.releaseDate),
-//     director: {
-//       connect: {
-//         id: director.id,
-//       },
-//     },
-//     imageUrl: data.imageUrl,
-//     stock: parseInt(data.stock),
-//     runtime: parseInt(data.runtime),
-//   },
-// });
-
-//     revalidatePath("/movies");
-//     revalidatePath(`/movies/${data.id}`);
-//   } catch (err) {
-//     console.error(err);
-
-//     if (err instanceof z.ZodError) {
-//       return false;
-//     }
-
-//     throw err;
-//   }
-
-//   if (shouldRedirect) {
-//     redirect(`/movies/${data.id}?toast=updated`);
-//   }
-
-//   return true;
-// }
