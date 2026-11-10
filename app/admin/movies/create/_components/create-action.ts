@@ -1,7 +1,8 @@
-
 "use server";
 
 import prisma from "@/lib/prisma";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
@@ -21,12 +22,31 @@ const createMovieSchema = z.object({
 type CreateMovieInput = z.input<typeof createMovieSchema>;
 
 export async function createMovie(input: CreateMovieInput) {
+  // Control login
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) {
+    return false;
+  }
+
+  // Control Admin role
+  const roles =
+    session.user.role?.split(",").map((role) => role.trim()) ?? [];
+
+  if (!roles.includes("admin")) {
+    return false;
+  }
+
+  //   // Validate information on the server
   const result = createMovieSchema.safeParse(input);
 
   if (!result.success) {
     return false;
   }
 
+  // Create movie
   let movieId: string;
 
   try {
@@ -34,7 +54,7 @@ export async function createMovie(input: CreateMovieInput) {
 
     const movie = await prisma.movie.create({
       data: {
-        tmdbId: Math.floor(Math.random() * 100000),  //temporary test, properly implement after testing
+        tmdbId: Math.floor(Math.random() * 100000), //temporary test, properly implement after testing
         title: data.title,
         description: data.description,
         price: data.price,
