@@ -98,7 +98,7 @@ export async function TMDBGenreCheck() {
   }
 }
 
-export function TMDBConvertMovieFormatToLocal(
+export async function TMDBConvertMovieFormatToLocal(
   TMDBMovieResult: TMDBMovieAndCreditsRoot,
   price: number,
   stock: number
