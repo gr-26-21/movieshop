@@ -5,8 +5,9 @@ import prisma from "@/lib/prisma";
 import { TMDBCastCredits, TMDBCrewCredits } from "@/types/tmdb";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 import { z } from "zod";
+
+// - MOVIES -
 
 const createMovieSchema = z.object({
   title: z
@@ -35,8 +36,7 @@ export async function createMovie(input: CreateMovieInput, tmdbId?: number) {
   }
 
   // Control Admin role
-  const roles =
-    session.user.role?.split(",").map((role) => role.trim()) ?? [];
+  const roles = session.user.role?.split(",").map((role) => role.trim()) ?? [];
 
   if (!roles.includes("admin")) {
     return false;
@@ -70,7 +70,9 @@ export async function createMovie(input: CreateMovieInput, tmdbId?: number) {
   }
 }
 
-//  !!EVERYTHING BELOW THIS POINT IS UNFINISHED WORK-IN-PROGRESS THAT SHOULD NOT BE USED YET!!
+//  !!EVERYTHING BELOW THIS POINT IS UNFINISHED WORK-IN-PROGRESS AND IS SUJECT TO CHANGE!!
+
+// - PERSONS -
 
 type CreatePersonInput = { tmdbid: number; name: string };
 
@@ -109,13 +111,13 @@ export async function findPersonById(personId: string) {
         name: true,
       },
     });
-    name = result?.name;
+    return result?.name;
   } catch (error) {
     console.error("Find person failed. Error:", error);
     const defaultErrorPersonh: string = "John Error";
     return defaultErrorPersonh;
   }
-  return name;
+  // return name;
 }
 export async function createAndConnectCastFromTMDBCredits(
   credits: TMDBCastCredits[],
@@ -174,4 +176,90 @@ export async function connectPersonToMovie(
       },
     },
   });
+}
+
+// - GENRES -
+
+//enter genre name to create, or update if already existing, case-insensitive.
+export async function createOrUpdateGenre(name: string, description?: string) {
+  const genreName = await formatInputToUppercaseFirst(name);
+  await prisma.genre.upsert({
+    where: {
+      name: genreName,
+    },
+    update: {
+      description: description,
+    },
+    create: {
+      name: genreName,
+      description: description,
+    },
+  });
+}
+
+//find genre by name, returns ID, case-insensitive
+export async function findGenreIdByName(name: string) {
+  const genreName = await formatInputToUppercaseFirst(name);
+  try {
+    const result = await prisma.genre.findUnique({
+      where: {
+        name: genreName,
+      },
+    });
+    // const id = result?.id;
+    // const name = result?.id;
+    // const description = result?.description;
+    // const output = { id, name, description };
+    return result?.id;
+  } catch {
+    return "Genre Missing";
+  }
+}
+
+//find genre by ID, returns full genre information, case-insensitive
+export async function findGenreById(id: string) {
+  try {
+    const result = await prisma.genre.findUnique({
+      where: {
+        id: id,
+      },
+    });
+    return result;
+  } catch {
+    return null; //note to self: ask about why it is null | undefined aithout this
+  }
+}
+
+//connects genre to a movie using the id from both respectively
+export async function connectGenreToMovie(genreId: string, movieId: string) {
+  try {
+    await prisma.movie.update({
+      where: {
+        id: movieId,
+      },
+      data: {
+        genres: {
+          connect: {
+            id: genreId,
+          },
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Couldn't connect genre to movie. Error: " + error);
+  }
+}
+
+//helper function to make multi-word strings capitalize the first letter of each word
+export async function formatInputToUppercaseFirst(input: string) {
+  const result = input
+    .toLowerCase()
+    .toString()
+    .split(" ")
+    .map(function (word) {
+      return word[0].toUpperCase() + word.substring(1);
+    })
+    .join(" "); //couldn't do tostring here without it being type () => string?
+  return result.toString();
+  //why did this have to be split up?
 }
