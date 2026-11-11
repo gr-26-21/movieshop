@@ -50,7 +50,7 @@ export default function MovieCard({
 
         <CardDescription>Released: {releaseDate}</CardDescription>
 
-        <CardDescription>${price}</CardDescription>
+        <CardDescription>{price} kr</CardDescription>
       </CardContent>
 
       <CardFooter>
