@@ -16,11 +16,13 @@ export default function MovieCard({
   price,
   releaseDate,
   imgURL,
+  actions,
 }: {
   title: string;
   price: number;
   releaseDate: number;
   imgURL: string | null;
+  actions?: React.ReactNode;
 }) {
   return (
     <Card className="p-0 pb-6">
@@ -42,7 +44,7 @@ export default function MovieCard({
       </CardContent>
 
       <CardFooter>
-        <Button className="w-full">Add to Cart</Button>
+        {actions ?? <Button className="w-full">Add to Cart</Button>}
       </CardFooter>
     </Card>
   );
