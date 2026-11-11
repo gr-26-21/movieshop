@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/card";
 
 import Image from "next/image";
+import errorImg from "@/public/404.png";
 
 export default function MovieCard({
   title,
@@ -25,7 +26,7 @@ export default function MovieCard({
     <Card className="p-0 pb-6">
       <CardHeader className="relative h-100 w-full overflow-hidden rounded-t-lg p-0">
         <Image
-          src={imgURL || "not found"}
+          src={imgURL || errorImg}
           alt={title}
           fill
           className="object-cover"
