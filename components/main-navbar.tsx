@@ -6,8 +6,8 @@ import { SignInForm } from "./auth/sign-in-form";
 import { RegisterForm } from "./auth/register-form";
 import { SignOutButton } from "./sign-out-button";
 import SearchMovieByName from "./search-movie-byName";
-import { ShoppingCart } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
+import { CartLink } from "./cart-link";
 
 export default async function MainNavbar() {
   const session = await auth.api.getSession({
@@ -24,17 +24,7 @@ export default async function MainNavbar() {
         <div>
           {/* search bar */}
           <div className="flex items-center gap-2">
-            <Link
-              href="/cart"
-              aria-label="Shopping cart"
-              className={buttonVariants({
-                variant: "ghost",
-                size: "icon",
-                className: "text-foreground",
-              })}
-            >
-              <ShoppingCart aria-hidden="true" />
-            </Link>
+            <CartLink />
             <SearchMovieByName />
           </div>
         </div>
