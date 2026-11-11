@@ -1,4 +1,4 @@
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -17,7 +17,6 @@ export default function MovieCard({
   price,
   releaseDate,
   imgURL,
-  actions,
 }: {
   title: string;
   price: number;
