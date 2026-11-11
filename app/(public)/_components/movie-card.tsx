@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -10,6 +10,7 @@ import {
 
 import Image from "next/image";
 import errorImg from "@/public/404.png";
+import Link from "next/link";
 
 export default function MovieCard({
   title,
@@ -42,7 +43,9 @@ export default function MovieCard({
       </CardContent>
 
       <CardFooter>
-        <Button className="w-full">Add to Cart</Button>
+        <Link href={"/cart"} className={`w-full ${buttonVariants()}`}>
+          Add to Cart
+        </Link>
       </CardFooter>
     </Card>
   );
