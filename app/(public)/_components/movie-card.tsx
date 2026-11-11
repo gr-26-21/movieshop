@@ -17,11 +17,13 @@ export default function MovieCard({
   price,
   releaseDate,
   imgURL,
+  actions,
 }: {
   title: string;
   price: number;
   releaseDate: number;
   imgURL: string | null;
+  actions?: React.ReactNode;
 }) {
   return (
     <Card className="p-0 pb-6">
