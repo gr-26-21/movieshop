@@ -43,11 +43,12 @@ export async function TMDBGetMovieAndCreditsById(
 }
 
 export async function TMDBGetAndConvertMovieAndCreditsById(
-  input: TMDBMovieAndCreditsRoot,
+  tmdbId: number,
   price: number,
   stock: number
 ) {
-  return TMDBConvertMovieFormatToLocal(input, price, stock);
+  const movie = await TMDBGetMovieAndCreditsById(tmdbId);
+  return TMDBConvertMovieFormatToLocal(movie, price, stock);
 }
 
 //TMDB genre population
