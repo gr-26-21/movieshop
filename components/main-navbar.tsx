@@ -6,6 +6,8 @@ import { SignInForm } from "./auth/sign-in-form";
 import { RegisterForm } from "./auth/register-form";
 import { SignOutButton } from "./sign-out-button";
 import SearchMovieByName from "./search-movie-byName";
+import { ShoppingCart } from "lucide-react";
+import { buttonVariants } from "@/components/ui/button";
 
 export default async function MainNavbar() {
   const session = await auth.api.getSession({
@@ -21,7 +23,20 @@ export default async function MainNavbar() {
         </Link>
         <div>
           {/* search bar */}
-          <SearchMovieByName />
+          <div className="flex items-center gap-2">
+            <Link
+              href="/cart"
+              aria-label="Shopping cart"
+              className={buttonVariants({
+                variant: "ghost",
+                size: "icon",
+                className: "text-foreground",
+              })}
+            >
+              <ShoppingCart aria-hidden="true" />
+            </Link>
+            <SearchMovieByName />
+          </div>
         </div>
       </div>
 
@@ -29,7 +44,17 @@ export default async function MainNavbar() {
       <div className="flex w-full flex-col items-center justify-between gap-4 rounded-lg sm:w-auto sm:flex-row sm:gap-8">
         <div className="flex gap-2">
           {session ? (
-            <SignOutButton />
+            <>
+              {session.user.role !== "admin" && (
+                <Link
+                  href="/user"
+                  className={buttonVariants({ variant: "outline" })}
+                >
+                  My account
+                </Link>
+              )}
+              <SignOutButton />
+            </>
           ) : (
             <>
               <SignInForm />
