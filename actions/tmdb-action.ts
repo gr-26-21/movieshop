@@ -42,6 +42,14 @@ export async function TMDBGetMovieAndCreditsById(
   return result.json();
 }
 
+export async function TMDBGetAndConvertMovieAndCreditsById(
+  input: TMDBMovieAndCreditsRoot,
+  price: number,
+  stock: number
+) {
+  return TMDBConvertMovieFormatToLocal(input, price, stock);
+}
+
 //TMDB genre population
 export async function TMDBFetchGenres(): Promise<TMDBGenreRoot> {
   const result = await fetch(`${BASE_URL}/genre/movie/list`, options);
