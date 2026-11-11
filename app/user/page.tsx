@@ -109,17 +109,19 @@ export default async function UserPage() {
               <ul className="space-y-2">
                 {order.items.map((item) => (
                   <li key={item.id}>
-                    {item.movie.title} — {item.quantity} × {item.priceAtPurchase}{" "}
-                    kr
+                    {item.movie.title} — {item.quantity} ×{" "}
+                    {item.priceAtPurchase} kr
                   </li>
                 ))}
               </ul>
 
               <h4 className="font-semibold">Delivery address</h4>
-              <div className="break-words">
+              <div className="wrap-break-word">
                 <p>{order.shippingName}</p>
                 <p>{order.shippingStreet}</p>
-                <p>{order.shippingPostalCode} {order.shippingCity}</p>
+                <p>
+                  {order.shippingPostalCode} {order.shippingCity}
+                </p>
                 <p>{order.shippingCountry}</p>
               </div>
             </details>

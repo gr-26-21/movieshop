@@ -5,6 +5,7 @@ import { headers } from "next/headers";
 import { SignInForm } from "./auth/sign-in-form";
 import { RegisterForm } from "./auth/register-form";
 import { SignOutButton } from "./sign-out-button";
+import SearchMovieByName from "./search-movie-byName";
 
 export default async function MainNavbar() {
   const session = await auth.api.getSession({
@@ -12,23 +13,30 @@ export default async function MainNavbar() {
   });
 
   return (
-    <nav className="flex h-15 items-center justify-between gap-2 border-b px-6">
+    <nav className="mt-5 mb-8 flex h-16 flex-col items-center justify-between gap-4 px-4 sm:h-20 sm:flex-row sm:px-6 lg:px-15">
       {/* logo */}
-      <div>
+      <div className="flex flex-2 flex-row items-center justify-between gap-4">
         <Link href={"/"}>
-          <h1 className="text-3xl">MovieShop</h1>
+          <h1 className="text-2xl font-bold sm:text-4xl">MovieShop</h1>
         </Link>
+        <div>
+          {/* search bar */}
+          <SearchMovieByName />
+        </div>
       </div>
+
       {/* sign-in, sign-up */}
-      <div className="flex gap-2">
-        {session ? (
-          <SignOutButton />
-        ) : (
-          <>
-            <SignInForm />
-            <RegisterForm />
-          </>
-        )}
+      <div className="flex w-full flex-col items-center justify-between gap-4 rounded-lg sm:w-auto sm:flex-row sm:gap-8">
+        <div className="flex gap-2">
+          {session ? (
+            <SignOutButton />
+          ) : (
+            <>
+              <SignInForm />
+              <RegisterForm />
+            </>
+          )}
+        </div>
       </div>
     </nav>
   );
