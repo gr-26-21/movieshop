@@ -17,12 +17,15 @@ export default function MovieCard({
   price,
   releaseDate,
   imgURL,
+  actions,
+  outOfStock = false,
 }: {
   title: string;
   price: number;
   releaseDate: number;
   imgURL: string | null;
   actions?: React.ReactNode;
+  outOfStock?: boolean;
 }) {
   return (
     <Card className="p-0 pb-6">
@@ -31,8 +34,15 @@ export default function MovieCard({
           src={imgURL || errorImg}
           alt={title}
           fill
-          className="object-cover"
+          className={
+            outOfStock ? "object-cover opacity-60 grayscale" : "object-cover"
+          }
         />
+        {outOfStock && (
+          <span className="absolute top-3 right-3 z-10 rounded-full bg-black/80 px-3 py-1 text-xs font-semibold text-white">
+            Out of stock
+          </span>
+        )}
       </CardHeader>
 
       <CardContent>
@@ -44,9 +54,11 @@ export default function MovieCard({
       </CardContent>
 
       <CardFooter>
-        <Link href={"/cart"} className={`w-full ${buttonVariants()}`}>
-          Add to Cart
-        </Link>
+        {actions ?? (
+          <Link href="/cart" className={`w-full ${buttonVariants()}`}>
+            Add to Cart
+          </Link>
+        )}
       </CardFooter>
     </Card>
   );

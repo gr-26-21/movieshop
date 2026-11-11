@@ -1,5 +1,6 @@
 import { Movie } from "@/generated/prisma/client";
 import MovieCard from "./movie-card";
+import { AddToCartButton } from "@/components/add-to-cart-button";
 
 export default function SelectedMovies({
   title,
@@ -20,6 +21,20 @@ export default function SelectedMovies({
                 price={movie.price}
                 releaseDate={movie.releaseDate.getFullYear()}
                 imgURL={movie.imageUrl}
+                outOfStock={movie.stock <= 0}
+                actions={
+                  <AddToCartButton
+                    product={{
+                      id: movie.id,
+                      title: movie.title,
+                      price: movie.price,
+                      description: movie.description,
+                      imageUrl: movie.imageUrl,
+                      stock: movie.stock,
+                    }}
+                    disabled={movie.stock <= 0}
+                  />
+                }
               />
             </div>
           ))}
