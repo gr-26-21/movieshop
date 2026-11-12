@@ -67,8 +67,13 @@ export default async function MovieDetailsPage(
           </div>
         ))}
       </div>
-
       <div className="flex gap-2">
+        <Link
+          href={`/admin/movies/`}
+          className={buttonVariants({ variant: "outline" })}
+        >
+          Back to movies
+        </Link>
         <Link
           href={`/admin/movies/${movie.id}/update`}
           className={buttonVariants({ variant: "outline" })}
