@@ -53,7 +53,7 @@ export default function MovieCard({
         <CardDescription>{price} kr</CardDescription>
       </CardContent>
 
-      <CardFooter>
+      <CardFooter className="mt-auto">
         {actions ?? (
           <Link href="/cart" className={`w-full ${buttonVariants()}`}>
             Add to Cart
