@@ -6,7 +6,6 @@ import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
-  CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
@@ -22,8 +21,7 @@ export default async function AdminMoviesPage() {
     redirect("/login");
   }
 
-  const roles =
-    session.user.role?.split(",").map((role) => role.trim()) ?? [];
+  const roles = session.user.role?.split(",").map((role) => role.trim()) ?? [];
 
   if (!roles.includes("admin")) {
     redirect("/");
@@ -34,10 +32,7 @@ export default async function AdminMoviesPage() {
     where: {
       deletedAt: null,
     },
-    orderBy: [
-      { updatedAt: "desc" },
-      { createdAt: "desc" },
-    ],
+    orderBy: [{ updatedAt: "desc" }, { createdAt: "desc" }],
   });
 
   return (
@@ -65,18 +60,12 @@ export default async function AdminMoviesPage() {
           <Card key={movie.id}>
             <CardHeader>
               <CardTitle>{movie.title}</CardTitle>
-              <CardDescription>
+              <CardDescription className="line-clamp-2">
                 {movie.description || "No description available"}
               </CardDescription>
             </CardHeader>
 
-            <CardContent>
-              <p className="line-clamp-2">
-                {movie.description?.substring(0, 100)}
-              </p>
-            </CardContent>
-
-            <CardFooter className="justify-end">
+            <CardFooter className="mt-auto justify-end">
               <Link
                 href={`/admin/movies/${movie.id}`}
                 className={buttonVariants()}
