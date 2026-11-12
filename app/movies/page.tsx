@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma";
 import Link from "next/link";
 import { AddToCartButton } from "@/components/add-to-cart-button";
 import MovieCard from "@/app/(public)/_components/movie-card";
+import { cn } from "@/lib/utils";
 
 export default async function MoviesPage() {
   const movies = await prisma.movie.findMany({
@@ -23,7 +24,7 @@ export default async function MoviesPage() {
   // order by trendy? :)
 
   return (
-    <div className="space-y-2 p-6">
+    <main className="space-y-2 p-6">
       {/* <h1 className="text-3xl font-bold">Movies Page</h1>
       <h2 className="text-xl font-semibold">This is the movies page.</h2> */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -72,9 +73,13 @@ export default async function MoviesPage() {
                   />
                   <Link
                     href={`/movies/${movie.id}`}
-                    className={buttonVariants({ variant: "link" })}
+                    className={cn(
+                      buttonVariants({ variant: "link" }),
+                      "text-card-foreground underline"
+                    )}
                   >
                     View Movie
+                    <span className="sr-only">{`: ${movie.title}`}</span>
                   </Link>
                 </div>
               </div>
@@ -82,6 +87,6 @@ export default async function MoviesPage() {
           />
         ))}
       </div>
-    </div>
+    </main>
   );
 }
