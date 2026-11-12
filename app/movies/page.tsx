@@ -3,7 +3,6 @@ import prisma from "@/lib/prisma";
 import Link from "next/link";
 import { AddToCartButton } from "@/components/add-to-cart-button";
 import MovieCard from "@/app/(public)/_components/movie-card";
-import { cn } from "@/lib/utils";
 
 export default async function MoviesPage({
   searchParams,

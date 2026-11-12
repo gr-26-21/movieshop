@@ -1,13 +1,16 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Film, ShoppingCart, Users, Wallet } from "lucide-react";
-import UserCounter from "./_components/user-counter";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { canAccessAdmin } from "@/lib/check-permissions";
-
-
+import {
+  getTotalUsers,
+  getTotalMovies,
+  getTotalOrders,
+  getTotalRevenue,
+} from "@/app/admin/_components/stats";
 
 export default async function AdminDashboard() {
   const session = await auth.api.getSession({
@@ -24,6 +27,14 @@ export default async function AdminDashboard() {
     redirect("/");
   }
 
+  const [totalUsers, totalMovies, totalOrders, totalRevenue] =
+    await Promise.all([
+      getTotalUsers(),
+      getTotalMovies(),
+      getTotalOrders(),
+      getTotalRevenue(),
+    ]);
+
   return (
     <>
       <div className="mx-auto grid max-w-6xl gap-5 sm:grid-cols-2">
@@ -38,9 +49,7 @@ export default async function AdminDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-center text-3xl">
-              <UserCounter />
-            </p>
+            <p className="text-center text-3xl">{totalUsers}</p>
           </CardContent>
         </Card>
         {/* total no. of movies */}
@@ -54,7 +63,7 @@ export default async function AdminDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-center text-3xl">500</p>
+            <p className="text-center text-3xl">{totalMovies}</p>
           </CardContent>
         </Card>
         {/* total no. of orders */}
@@ -68,7 +77,7 @@ export default async function AdminDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-center text-3xl">999</p>
+            <p className="text-center text-3xl">{totalOrders}</p>
           </CardContent>
         </Card>
 
@@ -83,7 +92,7 @@ export default async function AdminDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-center text-3xl">5000 SEK</p>
+            <p className="text-center text-3xl">{totalRevenue} SEK</p>
           </CardContent>
         </Card>
       </div>
