@@ -101,7 +101,6 @@ export async function createPerson(input: CreatePersonInput) {
 }
 
 export async function findPersonById(personId: string) {
-  let name: string | undefined;
   try {
     const result = await prisma.person.findUnique({
       where: {
