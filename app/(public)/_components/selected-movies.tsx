@@ -2,6 +2,7 @@ import { Movie } from "@/generated/prisma/client";
 import MovieCard from "./movie-card";
 import { AddToCartButton } from "@/components/add-to-cart-button";
 
+// A component for displaying a list of selected movies
 export default function SelectedMovies({
   title,
   moviesList,

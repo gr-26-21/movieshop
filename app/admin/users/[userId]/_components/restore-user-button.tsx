@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
 
+// A component for displaying a button to restore (unban) a user
 export default function RestoreUserButton({ userId }: { userId: string }) {
   const [loading, setLoading] = useState(false);
   const router = useRouter();

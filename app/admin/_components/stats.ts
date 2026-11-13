@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { headers } from "next/headers";
 
+// Functions to fetch various statistics for the admin dashboard
 export async function getTotalUsers() {
   try {
     const users = await auth.api.listUsers({
@@ -15,6 +16,7 @@ export async function getTotalUsers() {
   }
 }
 
+// fetch total movies
 export async function getTotalMovies() {
   try {
     return await prisma.movie.count({
@@ -26,6 +28,7 @@ export async function getTotalMovies() {
   }
 }
 
+// fetch total orders
 export async function getTotalOrders() {
   try {
     return await prisma.order.count();
@@ -35,6 +38,7 @@ export async function getTotalOrders() {
   }
 }
 
+// fetch total revenue
 export async function getTotalRevenue() {
   try {
     const result = await prisma.order.aggregate({
