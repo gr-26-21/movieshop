@@ -17,9 +17,9 @@ const updateMovieSchema = z.object({
   description: z.string().min(1, "Description is required"),
   price: z.number().min(1, "Price is required"),
   releaseDate: z.iso.date("Release date is required"),
-  imageUrl: z.string(),
-  stock: z.number().min(1, "Stock is required"),
-  runtime: z.number().min(1, "Runtime is required"),
+  imageUrl: z.string().url("Please provide a valid image URL"),
+  stock: z.number().int("Stock must be a whole number").min(1, "Stock is required"),
+  runtime: z.number().int("Runtime must be a whole number").min(1, "Runtime is required"),
 });
 
 type UpdateMovieInput = z.input<typeof updateMovieSchema>;

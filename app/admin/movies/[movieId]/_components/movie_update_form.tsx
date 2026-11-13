@@ -44,9 +44,9 @@ const formSchema = z.object({
       const currentYear = new Date().getFullYear();
       return year >= 1000 && year <= currentYear;
     }, "Movie year must be between 1000 and the current year"),
-  imageUrl: z.string(),
-  stock: z.number().min(1, "Stock is required"),
-  runtime: z.number().min(1, "Runtime is required"),
+  imageUrl: z.string().url("Please provide a valid image URL"),
+  stock: z.number().int("Stock must be a whole number").min(1, "Stock is required"),
+  runtime: z.number().int("Runtime must be a whole number").min(1, "Runtime is required"),
 });
 
 export function MovieUpdateForm({ movie }: MovieUpdateFormProps) {
@@ -190,7 +190,7 @@ export function MovieUpdateForm({ movie }: MovieUpdateFormProps) {
               field.state.meta.isTouched && !field.state.meta.isValid;
             return (
               <Field data-invalid={isInvalid}>
-                <FieldLabel htmlFor={field.name}>Image URL</FieldLabel>
+                <FieldLabel htmlFor={field.name}>Image URL (optional)</FieldLabel>
                 <Input
                   id={field.name}
                   name={field.name}
