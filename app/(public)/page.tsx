@@ -21,12 +21,15 @@ export default async function HomePage() {
   return (
     <>
       <div className="px-6 sm:px-12 lg:px-15">
-        <div className="flex items-center justify-end">
-          <Link href="/movies" className={buttonVariants()}>
+        <div className="my-5 flex w-full px-9 sm:items-center sm:justify-end">
+          <Link
+            href="/movies"
+            className={`${buttonVariants()} w-full text-center sm:w-auto`}
+          >
             View All
           </Link>
         </div>
-        <div>
+        <div className="space-y-5">
           <SelectedMovies
             title="Top 5 most recent movies"
             moviesList={recent}

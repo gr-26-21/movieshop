@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 export default function SearchMovieByName() {
   return (
     <>
-      <form action={"/movies"}>
+      <form action={"/movies"} className="px-8">
         <Input
           placeholder="search movie"
           className="px-5"

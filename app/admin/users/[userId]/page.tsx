@@ -54,11 +54,11 @@ export default async function UserDetailsPage(
   return (
     <>
       <div className="mx-auto max-w-4xl space-y-10">
-        <div className="flex items-center justify-between">
-          <h1 className="text-4xl">User Details</h1>
+        <div className="flex items-center">
+          <h1 className="text-2xl sm:text-4xl">User Details</h1>
         </div>
 
-        <div className="flex max-w-6xl rounded-2xl border p-8">
+        <div className="flex max-w-6xl flex-col space-y-6 rounded-2xl border p-8 sm:flex-row">
           <div className="flex-1 space-y-0.5">
             <div className="flex items-center gap-3">
               <p className="mb-2 text-3xl">{user.name}</p>
@@ -138,7 +138,7 @@ export default async function UserDetailsPage(
             <span>{user.updatedAt.toLocaleDateString()}</span>
           </div>
 
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col items-start sm:flex-row sm:justify-between">
             <span>User ID</span>
             <span>{user.id}</span>
           </div>
