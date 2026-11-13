@@ -12,6 +12,7 @@ import {
   getTotalRevenue,
 } from "@/app/admin/_components/stats";
 
+// A page component for the admin dashboard showing statistics like total users, movies, orders, and revenue
 export default async function AdminDashboard() {
   const session = await auth.api.getSession({
     headers: await headers(),

@@ -9,6 +9,7 @@ import SelectedMovies from "./_components/selected-movies";
 import { buttonVariants } from "@/components/ui/button";
 import Link from "next/link";
 
+// The main page component for the public section of the application
 export default async function HomePage() {
   const [recent, oldest, cheapest, purchased] = await Promise.all([
     mostRecentMovies(),

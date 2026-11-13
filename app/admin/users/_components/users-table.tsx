@@ -12,6 +12,7 @@ import {
 import { User } from "lucide-react";
 import Link from "next/link";
 
+// A component for displaying a table of users
 export default async function UsersTable({
   users,
 }: {

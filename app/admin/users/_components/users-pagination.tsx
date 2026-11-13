@@ -7,6 +7,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 
+// A component for displaying pagination for the users list
 export default function UsersPagination({
   currentPage,
   totalPages,

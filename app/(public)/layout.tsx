@@ -1,3 +1,4 @@
+// A layout component for the public pages of the application
 export default function PublicLayout({
   children,
 }: {

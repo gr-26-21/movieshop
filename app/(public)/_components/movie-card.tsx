@@ -12,6 +12,7 @@ import Image from "next/image";
 import errorImg from "@/public/404.png";
 import Link from "next/link";
 
+// A component for displaying a movie in a card layout
 export default function MovieCard({
   title,
   price,

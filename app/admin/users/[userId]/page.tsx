@@ -1,4 +1,3 @@
-
 import prisma from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
 import { redirect } from "next/navigation";
@@ -9,6 +8,7 @@ import RestoreUserButton from "./_components/restore-user-button";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 
+// A page component for displaying user details in the admin dashboard
 export default async function UserDetailsPage(
   props: PageProps<"/admin/users/[userId]">
 ) {
@@ -23,8 +23,7 @@ export default async function UserDetailsPage(
   }
 
   // Controll admin role
-  const roles =
-    session.user.role?.split(",").map((role) => role.trim()) ?? [];
+  const roles = session.user.role?.split(",").map((role) => role.trim()) ?? [];
 
   if (!roles.includes("admin")) {
     redirect("/");

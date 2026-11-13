@@ -1,9 +1,9 @@
-
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import UpdateUserForm from "./_components/update-user";
 
+// A page component for updating user details in the admin dashboard
 export default async function UpdateUserPage(
   props: PageProps<"/admin/users/[userId]/update">
 ) {
@@ -12,14 +12,13 @@ export default async function UpdateUserPage(
     headers: await headers(),
   });
 
+  // If no session -> "/login"
   if (!session) {
     redirect("/login");
   }
-  // If no session -> "/login"
 
   // Control the admin role
-  const roles =
-    session.user.role?.split(",").map((role) => role.trim()) ?? [];
+  const roles = session.user.role?.split(",").map((role) => role.trim()) ?? [];
 
   if (!roles.includes("admin")) {
     redirect("/");
@@ -42,5 +41,3 @@ export default async function UpdateUserPage(
 
   return <UpdateUserForm user={user} />;
 }
-
-// this page gets the user and shows the form which will lead to an update

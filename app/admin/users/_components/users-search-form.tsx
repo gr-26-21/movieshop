@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-export default async function UsersSearchForm({ search }: { search?: string }) {
+// A component for displaying a search form for users
+export default function UsersSearchForm({ search }: { search?: string }) {
   return (
     <>
       <form action="/admin/users">

@@ -26,6 +26,7 @@ import { toast } from "@/components/ui/toast";
 import z from "zod";
 import { useRouter } from "next/navigation";
 
+// A component for displaying a form to update user details
 export default function UpdateUserForm({
   user,
 }: {
