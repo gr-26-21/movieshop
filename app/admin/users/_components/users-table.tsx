@@ -32,10 +32,10 @@ export default async function UsersTable({
         <TableHeader className="text-xl">
           <TableRow>
             <TableHead>User</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Role</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Joined</TableHead>
+            <TableHead className="hidden sm:table-cell">Email</TableHead>
+            <TableHead className="hidden sm:table-cell">Role</TableHead>
+            <TableHead className="hidden sm:table-cell">Status</TableHead>
+            <TableHead className="hidden sm:table-cell">Joined</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -48,9 +48,13 @@ export default async function UsersTable({
                   <span>{user.name}</span>
                 </div>
               </TableCell>
-              <TableCell>{user.email}</TableCell>
-              <TableCell>{user.role}</TableCell>
-              <TableCell>
+              <TableCell className="hidden sm:table-cell">
+                {user.email}
+              </TableCell>
+              <TableCell className="hidden sm:table-cell">
+                {user.role}
+              </TableCell>
+              <TableCell className="hidden sm:table-cell">
                 <Badge
                   className={`px-4 py-3 ${
                     user.banned ? "bg-red-800" : "bg-green-800"
@@ -59,7 +63,9 @@ export default async function UsersTable({
                   {user.banned ? "banned" : "active"}
                 </Badge>
               </TableCell>
-              <TableCell>{user.createdAt.toLocaleDateString()}</TableCell>
+              <TableCell className="hidden sm:table-cell">
+                {user.createdAt.toLocaleDateString()}
+              </TableCell>
               <TableCell>
                 <div className="flex gap-2">
                   {/* view button*/}

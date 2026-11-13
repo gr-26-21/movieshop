@@ -52,15 +52,19 @@ export default async function UsersPage({
   return (
     <>
       <div className="mx-auto max-w-6xl space-y-8">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl">USERS</h1>
-          <div className="flex gap-2">
+        <div className="flex flex-col items-start justify-between space-y-5 sm:flex-row sm:items-center">
+          <h1 className="text-2xl sm:text-3xl">USERS</h1>
+          <div className="w-full sm:w-auto">
             <UsersSearchForm search={search} />
           </div>
         </div>
+
+        {/* Users Table */}
         <div className="rounded-2xl border p-5">
           <UsersTable users={result.users} />
         </div>
+
+        {/* Pagination  */}
         <div>
           <UsersPagination
             currentPage={currentPage}
