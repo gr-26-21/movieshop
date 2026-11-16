@@ -1,7 +1,14 @@
 "use server";
 
+import {
+  connectGenreToMovie,
+  connectPersonToMovie,
+  createMovie,
+  formatInputToUppercaseFirst,
+} from "@/app/admin/movies/create/_components/create-action";
 import prisma from "@/lib/prisma";
 import {
+  TMDBCastCredits,
   TMDBCreateMovieConversion,
   TMDBCrewCredits,
   TMDBGenreRoot,
@@ -17,6 +24,8 @@ const options = {
   method: "GET",
   headers: { accept: "application/json", Authorization: `Bearer ${TMDB_KEY}` },
 };
+
+// --- TMDB DATA FETCHING ---
 
 // use with a string containing part of a movie title
 // returns a list of movies with matching titles
@@ -42,6 +51,7 @@ export async function TMDBGetMovieAndCreditsById(
   return result.json();
 }
 
+//helper function to compress this step in other functions
 export async function TMDBGetAndConvertMovieAndCreditsById(
   tmdbId: number,
   price: number,
@@ -51,40 +61,44 @@ export async function TMDBGetAndConvertMovieAndCreditsById(
   return TMDBConvertMovieFormatToLocal(movie, price, stock);
 }
 
-//TMDB genre population
+// --- TMDB GENRE POPULATION ---
+
 export async function TMDBFetchGenres(): Promise<TMDBGenreRoot> {
   const result = await fetch(`${BASE_URL}/genre/movie/list`, options);
   return result.json();
 }
 
 export async function TMDBCreateGenre(name: string, tmdbId: number) {
+  const genreName = await formatInputToUppercaseFirst(name);
   try {
     await prisma.genre.upsert({
       where: {
+        name: genreName,
+      },
+      update: {
         tmdbId: tmdbId,
       },
-      update: {},
       create: {
-        name: name,
+        name: genreName,
         tmdbId: tmdbId,
       },
     });
     console.log(name + " genre created!");
-  } catch {
-    console.log("genre exists");
+  } catch (error) {
+    console.error("TMDB genre upsert error: " + error);
   }
 }
 
-//adds the list of genres from TMDB
+//genre seeding, should be run before creating a movie with tmdb
 export async function TMDBSeedGenre() {
   const tmdbGenres = await TMDBFetchGenres();
-  tmdbGenres.genres.map((result) => {
-    TMDBCreateGenre(result.name, result.id);
+  tmdbGenres.genres.map(async (result) => {
+    await TMDBCreateGenre(result.name, result.id);
   });
 }
 
-//are these not just kinda dupes? fix this.
-//a check for if genres may already exist instead of just requesting them every time
+//a basic check for if genres may already exist instead of just requesting them every time
+//not very reliable
 export async function TMDBGenreCheck() {
   const tmdbGenres = await prisma.genre.findFirst({
     where: {
@@ -94,12 +108,7 @@ export async function TMDBGenreCheck() {
     },
   });
   if (tmdbGenres === null) {
-    // const genres = await TMDBFetchGenres();
-    // genres.genres.map((result) => {
-    //   TMDBCreateGenre(result.name, result.id);
-    //   console.log(result.name + " genre created!");
-    // });
-    TMDBSeedGenre(); //should be all?
+    TMDBSeedGenre();
   } else {
     console.log(
       "Some TMDB genres exist, one or more may still be missing. Run seeding function manually to ensure proper population"
@@ -107,6 +116,79 @@ export async function TMDBGenreCheck() {
   }
 }
 
+// --- TMDB CREATE AND CONNECT FUNCTIONS ---
+
+//helper function to compress
+export async function TMDBCreateMovie(movie: TMDBCreateMovieConversion) {
+  return createMovie(movie, movie.tmdbid);
+}
+
+type CreatePersonInput = { tmdbid: number; name: string };
+
+//creates a person with data from a tmdb response
+export async function TMDBcreatePerson(input: CreatePersonInput) {
+  let personId: string;
+  try {
+    const person = await prisma.person.upsert({
+      where: {
+        tmdbId: input.tmdbid,
+      },
+      update: {},
+      create: {
+        tmdbId: input.tmdbid,
+        name: input.name,
+      },
+    });
+    personId = person.id.toString();
+    return personId;
+  } catch (error) {
+    console.error("Failed to create person. Error", error);
+    return "0";
+  }
+}
+
+//adds cast from tmdb credits to a movie and returns a list of person IDs
+export async function TMDBcreateAndConnectCastFromCredits(
+  credits: TMDBCastCredits[],
+  movieId: string
+) {
+  try {
+    const CastIdList = credits.map(async (result) => {
+      const person = { tmdbid: result.id, name: result.name };
+      const personId = await TMDBcreatePerson(person);
+      await connectPersonToMovie(personId, movieId, "ACTOR");
+      console.log(person.name + " Added as Actor");
+      return personId;
+    });
+    console.log("Finished adding Cast");
+    return CastIdList;
+  } catch (error) {
+    console.error("Create cast error: ", error);
+  }
+}
+
+//adds crew from tmdb credits to a movie and returns a list of person IDs
+//made so that "DIRECTOR" could be changed to "CREW" to allow other crew jobs than director
+export async function TMDBcreateAndConnectCrewFromCredits(
+  credits: TMDBCrewCredits[],
+  movieId: string
+) {
+  try {
+    const CrewIdList = credits.map(async (result) => {
+      const person = { tmdbid: result.id, name: result.name };
+      const personId = await TMDBcreatePerson(person);
+      await connectPersonToMovie(personId, movieId, "DIRECTOR");
+      console.log(person.name + '"added as ' + result.job);
+      return personId;
+    });
+    console.log("Finished adding Crew");
+    return CrewIdList;
+  } catch (error) {
+    console.error("Create crew error: ", error);
+  }
+}
+
+//helper function to convert tmdb movie data to the format our db uses
 export async function TMDBConvertMovieFormatToLocal(
   TMDBMovieResult: TMDBMovieAndCreditsRoot,
   price: number,
@@ -117,7 +199,8 @@ export async function TMDBConvertMovieFormatToLocal(
     description: TMDBMovieResult.overview,
     price: price,
     releaseDate: TMDBMovieResult.release_date,
-    imageUrl: TMDBMovieResult.poster_path,
+    imageUrl:
+      "https://image.tmdb.org/t/p/original" + TMDBMovieResult.poster_path,
     stock: stock,
     runtime: TMDBMovieResult.runtime,
     tmdbid: TMDBMovieResult.id,
@@ -125,6 +208,7 @@ export async function TMDBConvertMovieFormatToLocal(
   return movie;
 }
 
+//helper function to filter out directors from crew
 export async function TMDBFilterDirector(
   crewList: TMDBCrewCredits[]
 ): Promise<TMDBCrewCredits[] | false> {
@@ -134,6 +218,78 @@ export async function TMDBFilterDirector(
     return false;
   }
   return directors;
+}
+
+//one big function that takes the tmdb id of a movie, price, and stock
+// to add and connect everything relating to that movie
+//NOTE: make sure "await TMDBSeedGenre" has run before this function can be used
+// to avoid missing genres
+export default async function TMDBAddAndConnectAllByMovieId(
+  tmdbId: number,
+  price: number,
+  stock: number
+) {
+  //unreliable fail-safe in case genre was not seeded properly
+  TMDBGenreCheck();
+  try {
+    //fetch data from tmdb and convert it to the format of our database
+    const fetchResult = await TMDBGetMovieAndCreditsById(tmdbId);
+    const genres = fetchResult.genres;
+    const preparedMovie = await TMDBConvertMovieFormatToLocal(
+      fetchResult,
+      price,
+      stock
+    );
+
+    //create movie
+    const movieId = await TMDBCreateMovie(preparedMovie);
+    if (!movieId) {
+      console.error("Movie creation failed of ID: " + tmdbId);
+      return "Movie creation failed of ID: " + tmdbId;
+    }
+
+    //add cast to movie
+    const cast = await TMDBcreateAndConnectCastFromCredits(
+      fetchResult.credits.cast,
+      movieId
+    );
+    if (!cast) {
+      console.error("Failed to add cast");
+      return "Failed to add cast";
+    }
+
+    //find and add director to movie
+    const director = await TMDBFilterDirector(fetchResult.credits.crew);
+
+    if (!director) {
+      console.error("Failed to find director");
+      return "Failed to find director";
+    }
+
+    const crew = await TMDBcreateAndConnectCrewFromCredits(director, movieId);
+    if (!crew) {
+      console.error("Failed to add crew");
+      return "Failed to add crew";
+    }
+
+    //add genres to movie
+    const genre = genres.map(async (genre) => {
+      //why does it only console.log the first genre added?
+      return await connectGenreToMovie(genre.name, movieId);
+    });
+    if (!genre) {
+      console.error("Failed to add genres");
+      return "Failed to add genres";
+    }
+
+    console.log("Reached end of create and connect ALL");
+    return movieId;
+  } catch (error) {
+    console.error(
+      "Failed to add movie with TMDBID: '" + tmdbId + "'. Error:" + error
+    );
+    return "Chain Broke, error:" + error;
+  }
 }
 
 // may be redundant
