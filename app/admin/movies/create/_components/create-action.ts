@@ -7,7 +7,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { z } from "zod";
 
-// - MOVIES -
+// --- MOVIES ---
 
 const createMovieSchema = z.object({
   title: z
@@ -24,7 +24,7 @@ const createMovieSchema = z.object({
 
 type CreateMovieInput = z.input<typeof createMovieSchema>;
 
-//created a movie with input either from a tmdb respone or a manual form
+//created a movie with input either from a tmdb data or a manual form
 export async function createMovie(input: CreateMovieInput, tmdbId?: number) {
   // Control login
   const session = await auth.api.getSession({
@@ -42,7 +42,7 @@ export async function createMovie(input: CreateMovieInput, tmdbId?: number) {
     return false;
   }
 
-  //   // Validate information on the server
+  // Validate information on the server
   const result = createMovieSchema.safeParse(input);
   if (!result.success) {
     return false;
@@ -63,45 +63,35 @@ export async function createMovie(input: CreateMovieInput, tmdbId?: number) {
         runtime: data.runtime,
       },
     });
-    return movie.id; //now returns the movieId to use for an external redirect instead[remove this note before finalizing]
+    return movie.id; //returns the movieId to use for an external redirect[remove this note before finalizing]
   } catch (error) {
-    console.error("Failed to create movie:", error);
-    return false; //decide if we want to return an error
+    console.error("Failed to create movie. Error:", error);
+    return false; //decide what we want to return for error
   }
 }
 
-//  !!EVERYTHING BELOW THIS POINT IS UNFINISHED WORK-IN-PROGRESS AND IS SUJECT TO CHANGE!!
+// --- PERSONS ---
 
-// - PERSONS -
+type CreatePersonInput = { name: string };
 
-type CreatePersonInput = { tmdbid: number; name: string };
-
-//currently creates a person with input from a tmdb response
-//TODO: make compatible with manual create if plausible.
-// If it would take a separate if block, make a separate function unless other parts are worth it.
+//untested but should create a new person
 export async function createPerson(input: CreatePersonInput) {
   let personId: string;
   try {
-    const person = await prisma.person.upsert({
-      where: {
-        tmdbId: input.tmdbid,
-      },
-      update: {},
-      create: {
-        tmdbId: input.tmdbid,
+    const person = await prisma.person.create({
+      data: {
         name: input.name,
       },
     });
-    personId = person.id;
+    personId = person.id.toString();
+    return personId;
   } catch (error) {
-    console.error("Failed to create person:", error);
-    return "Person Error:";
+    console.error("Failed to create person. Error", error);
+    return null;
   }
-  return personId;
 }
 
 export async function findPersonById(personId: string) {
-  let name: string | undefined;
   try {
     const result = await prisma.person.findUnique({
       where: {
@@ -111,51 +101,11 @@ export async function findPersonById(personId: string) {
         name: true,
       },
     });
-    return result?.name;
+    return result;
   } catch (error) {
-    console.error("Find person failed. Error:", error);
-    const defaultErrorPersonh: string = "John Error";
-    return defaultErrorPersonh;
+    console.error("Failed to find person. Error:", error);
+    return "Unknown Person";
   }
-  // return name;
-}
-export async function createAndConnectCastFromTMDBCredits(
-  credits: TMDBCastCredits[],
-  movieId: string
-) {
-  const creditPersonIdList = credits.map((result) => {
-    const tmdbid = result.id;
-    const name = result.name;
-    const person = { tmdbid, name };
-    // const persontest = {result.id, result.name} //why not?
-    const personId = createPerson(person).toString();
-    connectPersonToMovie(personId, movieId, "ACTOR");
-    return 'Added "' + personId + '" as Actor';
-  });
-  //maybe remove
-  // const connectionConfirmation = creditPersonIdList.map((result) => {
-  //   const personId = result.toString();
-  //   connectPersonToMovie(personId, movieId);
-  //   const person = findPersonById(personId).toString();
-  //   return `Connected person: ${person}`;
-  // });
-  return creditPersonIdList;
-}
-
-//made so that "DIRECTOR" could be changed to "CREW" to allow other crew jobs than director
-export async function createAndConnectCrewFromTMDBCredits(
-  credits: TMDBCrewCredits[],
-  movieId: string
-) {
-  const creditPersonIdList = credits.map((result) => {
-    const tmdbid = result.id;
-    const name = result.name;
-    const person = { tmdbid, name };
-    const personId = createPerson(person).toString();
-    connectPersonToMovie(personId, movieId, "DIRECTOR");
-    return 'Added "' + personId + '" as ' + result.job;
-  });
-  return creditPersonIdList;
 }
 
 export async function connectPersonToMovie(
@@ -163,38 +113,51 @@ export async function connectPersonToMovie(
   movieId: string,
   role: PersonRole
 ) {
-  await prisma.movie.update({
-    where: {
-      id: movieId,
-    },
-    data: {
-      persons: {
-        connect: {
-          id: personId,
-          role: role,
+  try {
+    await prisma.movie.update({
+      where: {
+        id: movieId,
+      },
+      data: {
+        persons: {
+          create: {
+            role: role,
+            person: {
+              connect: {
+                id: personId,
+              },
+            },
+          },
         },
       },
-    },
-  });
+    });
+  } catch (error) {
+    console.error("Failed to connect person and movie. Error: " + error);
+  }
 }
 
-// - GENRES -
+// --- GENRES ---
 
 //enter genre name to create, or update if already existing, case-insensitive.
 export async function createOrUpdateGenre(name: string, description?: string) {
   const genreName = await formatInputToUppercaseFirst(name);
-  await prisma.genre.upsert({
-    where: {
-      name: genreName,
-    },
-    update: {
-      description: description,
-    },
-    create: {
-      name: genreName,
-      description: description,
-    },
-  });
+  try {
+    await prisma.genre.upsert({
+      where: {
+        name: genreName,
+      },
+      update: {
+        description: description,
+      },
+      create: {
+        name: genreName,
+        description: description,
+      },
+    });
+    return genreName;
+  } catch (error) {
+    console.error("Failed to create genre. Error: " + error);
+  }
 }
 
 //find genre by name, returns ID, case-insensitive
@@ -206,32 +169,31 @@ export async function findGenreIdByName(name: string) {
         name: genreName,
       },
     });
-    // const id = result?.id;
-    // const name = result?.id;
-    // const description = result?.description;
-    // const output = { id, name, description };
-    return result?.id;
+    return result;
   } catch {
-    return "Genre Missing";
+    console.error("Genre not found. Error: " + genreName);
+    return null;
   }
 }
 
 //find genre by ID, returns full genre information, case-insensitive
-export async function findGenreById(id: string) {
+export async function findGenreById(genreId: string) {
   try {
     const result = await prisma.genre.findUnique({
       where: {
-        id: id,
+        id: genreId,
       },
     });
     return result;
   } catch {
-    return null; //note to self: ask about why it is null | undefined aithout this
+    console.error("Genre not found ID. Error: " + genreId);
+    return null;
   }
 }
 
 //connects genre to a movie using the id from both respectively
-export async function connectGenreToMovie(genreId: string, movieId: string) {
+export async function connectGenreToMovie(name: string, movieId: string) {
+  const genreName = await formatInputToUppercaseFirst(name);
   try {
     await prisma.movie.update({
       where: {
@@ -240,13 +202,16 @@ export async function connectGenreToMovie(genreId: string, movieId: string) {
       data: {
         genres: {
           connect: {
-            id: genreId,
+            name: genreName,
           },
         },
       },
     });
+    console.log("Genre connected: " + genreName);
+    return genreName;
   } catch (error) {
     console.error("Couldn't connect genre to movie. Error: " + error);
+    return null;
   }
 }
 
@@ -260,6 +225,6 @@ export async function formatInputToUppercaseFirst(input: string) {
       return word[0].toUpperCase() + word.substring(1);
     })
     .join(" "); //couldn't do tostring here without it being type () => string?
+  //why did toString have to be done here separately?
   return result.toString();
-  //why did this have to be split up?
 }
