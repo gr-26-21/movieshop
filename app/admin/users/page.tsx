@@ -1,9 +1,9 @@
 import UsersTable from "./_components/users-table";
 import UsersSearchForm from "./_components/users-search-form";
+import UsersPagination from "./_components/users-pagination";
+import { requireAdmin } from "@/lib/auth-helpers";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { redirect } from "next/navigation";
-import UsersPagination from "./_components/users-pagination";
 
 //
 export default async function UsersPage({
@@ -14,21 +14,7 @@ export default async function UsersPage({
     page?: string;
   }>;
 }) {
-  // Check if user is in a active session
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (!session) {
-    redirect("/login");
-  }
-
-  // Admin access to list all users
-  const roles = session.user.role?.split(",").map((role) => role.trim()) ?? [];
-
-  if (!roles.includes("admin")) {
-    redirect("/");
-  }
+  await requireAdmin();
 
   const { search, page } = await searchParams;
 

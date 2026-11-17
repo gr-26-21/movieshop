@@ -1,15 +1,13 @@
 import prisma from "@/lib/prisma";
-import { getAdminSession } from "@/lib/auth-helpers";
-import { redirect, notFound } from "next/navigation";
+import { notFound } from "next/navigation";
 import { MovieUpdateForm } from "../_components/movie_update_form";
 import { requireAdmin } from "@/lib/auth-helpers";
-
 
 export default async function MovieUpdatePage(
   props: PageProps<"/admin/movies/[movieId]/update">
 ) {
-// Control admin access
-await requireAdmin();
+  // Control admin access
+  await requireAdmin();
 
   // Get movieId
   const params = await props.params;

@@ -14,9 +14,9 @@ export const authClient = createAuthClient({
   ],
 });
 
-// get the information from the logged in user 
+// get the information from the logged in user
 // Instead of standard settings, the admin client plugin will use the customed ac (Access Control) system
-// Where roles will register the admin and the user 
+// Where roles will register the admin and the user
 // which will  let the client use same permission definitions as the server
 
 // https://better-auth.com/docs/plugins/admin#pass-roles-to-the-plugin
