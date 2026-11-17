@@ -9,7 +9,7 @@ export default async function MovieDetailsPage(
   props: PageProps<"/admin/movies/[movieId]">
 ) {
   // Control login
-await requireAdmin();
+  await requireAdmin();
 
   // Get movie ID
   const params = await props.params;

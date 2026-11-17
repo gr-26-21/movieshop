@@ -36,5 +36,5 @@ export async function requireAdmin() {
   return result.session;
 }
 
-// Använd requireAdmin() när du vill skicka bort obehöriga användare från en sida.
-// Använd getAdminSession() när du vill bestämma själv vad serverfunktionen ska returnera vid nekad åtkomst.
+// Use requireAdmin() when you want to redirect unauthorized users away from a page.
+// Use getAdminSession() when you want to decide what the server function should return when access is denied.
