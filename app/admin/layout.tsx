@@ -28,7 +28,7 @@ export default async function AdminLayout({
       <main className="flex-1">
         <header className="mb-8 flex items-center justify-between border-b px-3 py-4">
           <SidebarTrigger />
-          <span>logged in as {session?.user?.role}</span>
+          <span className="pr-8">logged in as {session?.user?.role}</span>
         </header>
 
         <div className="p-5">{children}</div>
