@@ -21,14 +21,31 @@ const createMovieSchema = z.object({
   runtime: z.number().min(1, "Runtime is required"),
 });
 
+export async function checkAdmin() {
+  // Control login
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) {
+    console.error("Error: Session not found");
+    return false;
+  }
+
+  // Control Admin role
+  const roles = session.user.role?.split(",").map((role) => role.trim()) ?? [];
+
+  if (!roles.includes("admin")) {
+    console.error("Error: User not administrator");
+    return false;
+  }
+}
+
 type CreateMovieInput = z.input<typeof createMovieSchema>;
 
-//created a movie with input either from a tmdb data or a manual form
+//creates a movie with input either from a tmdb data or a manual form
 export async function createMovie(input: CreateMovieInput, tmdbId?: number) {
-  // Control admin access
-  const adminSession = await getAdminSession();
-
-  if (adminSession.status !== "authorized") {
+  if (!(await checkAdmin())) {
     return false;
   }
 
@@ -84,7 +101,7 @@ export async function createPerson(input: CreatePersonInput) {
     personId = person.id.toString();
     return personId;
   } catch (error) {
-    console.error("Failed to create person. Error", error);
+    console.error("Failed to create person: " + input.name + ". Error", error);
     return null;
   }
 }
@@ -238,12 +255,10 @@ export async function connectGenreToMovie(name: string, movieId: string) {
 export async function formatInputToUppercaseFirst(input: string) {
   const result = input
     .toLowerCase()
-    .toString()
     .split(" ")
     .map(function (word) {
-      return word[0].toUpperCase() + word.substring(1);
+      return word.charAt(0).toUpperCase() + word.substring(1);
     })
-    .join(" "); //couldn't do tostring here without it being type () => string?
-  //why did toString have to be done here separately?
-  return result.toString();
+    .join(" ");
+  return result;
 }
