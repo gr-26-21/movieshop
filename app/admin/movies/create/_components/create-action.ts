@@ -3,8 +3,7 @@
 import { PersonRole } from "@/generated/prisma/enums";
 import prisma from "@/lib/prisma";
 import { TMDBCastCredits, TMDBCrewCredits } from "@/types/tmdb";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
+import { getAdminSession } from "@/lib/auth-helpers";
 import { z } from "zod";
 
 // --- MOVIES ---
@@ -26,19 +25,10 @@ type CreateMovieInput = z.input<typeof createMovieSchema>;
 
 //created a movie with input either from a tmdb data or a manual form
 export async function createMovie(input: CreateMovieInput, tmdbId?: number) {
-  // Control login
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  // Control admin access
+  const adminSession = await getAdminSession();
 
-  if (!session) {
-    return false;
-  }
-
-  // Control Admin role
-  const roles = session.user.role?.split(",").map((role) => role.trim()) ?? [];
-
-  if (!roles.includes("admin")) {
+  if (adminSession.status !== "authorized") {
     return false;
   }
 
@@ -76,6 +66,14 @@ type CreatePersonInput = { name: string };
 
 //untested but should create a new person
 export async function createPerson(input: CreatePersonInput) {
+  // -----Control admin access for unautchenticated, forbidden or if authorized to protect server actions-----
+  const adminSession = await getAdminSession();
+
+  if (adminSession.status !== "authorized") {
+    return null;
+  }
+  // ---------------------------------------------------------------------------------------------------------
+
   let personId: string;
   try {
     const person = await prisma.person.create({
@@ -113,6 +111,13 @@ export async function connectPersonToMovie(
   movieId: string,
   role: PersonRole
 ) {
+  // Control admin access
+  const adminSession = await getAdminSession();
+
+  if (adminSession.status !== "authorized") {
+    return;
+  }
+
   try {
     await prisma.movie.update({
       where: {
@@ -140,6 +145,13 @@ export async function connectPersonToMovie(
 
 //enter genre name to create, or update if already existing, case-insensitive.
 export async function createOrUpdateGenre(name: string, description?: string) {
+  // Control admin access
+  const adminSession = await getAdminSession();
+
+  if (adminSession.status !== "authorized") {
+    return null;
+  }
+
   const genreName = await formatInputToUppercaseFirst(name);
   try {
     await prisma.genre.upsert({
@@ -193,6 +205,13 @@ export async function findGenreById(genreId: string) {
 
 //connects genre to a movie using the id from both respectively
 export async function connectGenreToMovie(name: string, movieId: string) {
+  // Control admin access
+  const adminSession = await getAdminSession();
+
+  if (adminSession.status !== "authorized") {
+    return null;
+  }
+
   const genreName = await formatInputToUppercaseFirst(name);
   try {
     await prisma.movie.update({

@@ -1,30 +1,17 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
+import { getAdminSession } from "@/lib/auth-helpers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-async function isAdmin(): Promise<boolean> {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (!session) {
-    return false;
-  }
-
-  const roles = session.user.role?.split(",").map((role) => role.trim()) ?? [];
-
-  return roles.includes("admin");
-}
-
 // SOFT DELETE MOVIE
 export async function softDeleteMovie(movieId: string): Promise<void> {
-  if (!(await isAdmin())) {
-    redirect("/movies");
-  }
+const adminSession = await getAdminSession();
+
+if (adminSession.status !== "authorized") {
+  redirect("/movies");
+}
 
   const result = await prisma.movie.updateMany({
     where: {
@@ -52,9 +39,11 @@ export async function softDeleteMovie(movieId: string): Promise<void> {
 // This means the movie is no longer marked as deleted in the database.
 
 export async function restoreMovie(movieId: string): Promise<void> {
-  if (!(await isAdmin())) {
-    redirect("/movies");
-  }
+const adminSession = await getAdminSession();
+
+if (adminSession.status !== "authorized") {
+  redirect("/movies");
+}
 
   const result = await prisma.movie.updateMany({
     where: {

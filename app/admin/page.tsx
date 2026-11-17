@@ -1,10 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Film, ShoppingCart, Users, Wallet } from "lucide-react";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
-import { canAccessAdmin } from "@/lib/check-permissions";
+import { requireAdmin } from "@/lib/auth-helpers";
 import {
   getTotalUsers,
   getTotalMovies,
@@ -14,19 +11,7 @@ import {
 
 // A page component for the admin dashboard showing statistics like total users, movies, orders, and revenue
 export default async function AdminDashboard() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (!session) {
-    redirect("/login");
-  }
-
-  const allowed = await canAccessAdmin(session.user.id);
-
-  if (!allowed) {
-    redirect("/");
-  }
+await requireAdmin();
 
   const [totalUsers, totalMovies, totalOrders, totalRevenue] =
     await Promise.all([

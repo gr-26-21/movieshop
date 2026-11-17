@@ -1,27 +1,15 @@
 import prisma from "@/lib/prisma";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
+import { getAdminSession } from "@/lib/auth-helpers";
 import { redirect, notFound } from "next/navigation";
 import { MovieUpdateForm } from "../_components/movie_update_form";
+import { requireAdmin } from "@/lib/auth-helpers";
+
 
 export default async function MovieUpdatePage(
   props: PageProps<"/admin/movies/[movieId]/update">
 ) {
-  // Control login
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (!session) {
-    redirect("/login");
-  }
-
-  // Control admin role
-  const roles = session.user.role?.split(",").map((role) => role.trim()) ?? [];
-
-  if (!roles.includes("admin")) {
-    redirect("/");
-  }
+// Control admin access
+await requireAdmin();
 
   // Get movieId
   const params = await props.params;

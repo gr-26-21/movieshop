@@ -1,23 +1,8 @@
 import { MovieCreateForm } from "./_components/movie-create-form";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+import { requireAdmin } from "@/lib/auth-helpers";
 
 export default async function MovieCreatePage() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (!session) {
-    redirect("/login");
-  }
-
-  const roles =
-    session.user.role?.split(",").map((role) => role.trim()) ?? [];
-
-  if (!roles.includes("admin")) {
-    redirect("/");
-  }
+await requireAdmin();
 
   return (
     <div className="space-y-2 p-6">
