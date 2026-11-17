@@ -6,6 +6,7 @@ import {
   createMovie,
   formatInputToUppercaseFirst,
 } from "@/app/admin/movies/create/_components/create-action";
+import { getAdminSession } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
 import {
   TMDBCastCredits,
@@ -69,6 +70,13 @@ export async function TMDBFetchGenres(): Promise<TMDBGenreRoot> {
 }
 
 export async function TMDBCreateGenre(name: string, tmdbId: number) {
+  // admin access-----
+  const adminSession = await getAdminSession();
+
+  if (adminSession.status !== "authorized") {
+    return;
+  }
+  //-----------------
   const genreName = await formatInputToUppercaseFirst(name);
   try {
     await prisma.genre.upsert({
@@ -127,6 +135,13 @@ type CreatePersonInput = { tmdbid: number; name: string };
 
 //creates a person with data from a tmdb response
 export async function TMDBcreatePerson(input: CreatePersonInput) {
+  // admin access--------
+  const adminSession = await getAdminSession();
+
+  if (adminSession.status !== "authorized") {
+    return "0";
+  }
+  // ----------------------
   let personId: string;
   try {
     const person = await prisma.person.upsert({

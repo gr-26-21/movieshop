@@ -1,20 +1,9 @@
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
+
+import { requireAdmin } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
 
 export default async function OrdersPage() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (!session) {
-    redirect("/");
-  }
-
-  if (session.user.role !== "admin") {
-    redirect("/user");
-  }
+await requireAdmin();
 
   const orders = await prisma.order.findMany({
     orderBy: { createdAt: "desc" },

@@ -1,7 +1,5 @@
-import { auth } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -13,19 +11,7 @@ import {
 } from "@/components/ui/card";
 
 export default async function AdminMoviesPage() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (!session) {
-    redirect("/login");
-  }
-
-  const roles = session.user.role?.split(",").map((role) => role.trim()) ?? [];
-
-  if (!roles.includes("admin")) {
-    redirect("/");
-  }
+  await requireAdmin();
 
   // Get active movies
   const movies = await prisma.movie.findMany({
