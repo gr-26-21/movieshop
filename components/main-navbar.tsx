@@ -34,12 +34,16 @@ export default async function MainNavbar() {
           {session ? (
             <>
               {session.user.role !== "admin" && (
-                <Link
-                  href="/user"
-                  className={buttonVariants({ variant: "outline" })}
-                >
-                  My account
-                </Link>
+                <>
+                  <CartLink />
+
+                  <Link
+                    href="/user"
+                    className={buttonVariants({ variant: "outline" })}
+                  >
+                    My account
+                  </Link>
+                </>
               )}
               <SignOutButton />
             </>
