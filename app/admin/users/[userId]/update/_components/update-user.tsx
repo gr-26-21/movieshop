@@ -26,6 +26,7 @@ import { toast } from "@/components/ui/toast";
 import z from "zod";
 import { useRouter } from "next/navigation";
 
+// A component for displaying a form to update user details
 export default function UpdateUserForm({
   user,
 }: {
@@ -89,7 +90,7 @@ export default function UpdateUserForm({
   return (
     <>
       <div className="mx-auto max-w-4xl">
-        <h1 className="mb-10 text-4xl">Update User Details</h1>
+        <h1 className="mb-10 text-2xl sm:text-4xl">Update User Details</h1>
         <div className="rounded-2xl border p-8">
           <form
             onSubmit={(e) => {
@@ -157,9 +158,9 @@ export default function UpdateUserForm({
                   );
                 }}
               </form.Field>
-              <div className="flex items-center gap-5">
+              <div className="flex flex-col items-center gap-5 sm:flex-row">
                 {/* role */}
-                <div className="flex-1 rounded-2xl border p-5">
+                <div className="w-full flex-1 rounded-2xl border p-5">
                   <form.Field name="role">
                     {(field) => {
                       const isInvalid =
@@ -204,7 +205,7 @@ export default function UpdateUserForm({
                   </form.Field>
                 </div>
                 {/* banned */}
-                <div className="flex-1 rounded-2xl border px-5 py-7">
+                <div className="w-full flex-1 rounded-2xl border px-5 py-7">
                   <form.Field name="banned">
                     {(field) => {
                       const isInvalid =

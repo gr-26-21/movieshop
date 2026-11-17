@@ -1,4 +1,3 @@
-
 import prisma from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
 import { redirect } from "next/navigation";
@@ -6,29 +5,13 @@ import { CalendarDays, Edit, Mail, User } from "lucide-react";
 import Link from "next/link";
 import SoftDeleteUserButton from "./_components/delete-user-button";
 import RestoreUserButton from "./_components/restore-user-button";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
+import { requireAdmin } from "@/lib/auth-helpers";
 
+// A page component for displaying user details in the admin dashboard
 export default async function UserDetailsPage(
   props: PageProps<"/admin/users/[userId]">
 ) {
-  // Controll logged in user
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  // Not logged in
-  if (!session) {
-    redirect("/login");
-  }
-
-  // Controll admin role
-  const roles =
-    session.user.role?.split(",").map((role) => role.trim()) ?? [];
-
-  if (!roles.includes("admin")) {
-    redirect("/");
-  }
+  await requireAdmin();
 
   const { userId } = await props.params;
 
@@ -37,7 +20,6 @@ export default async function UserDetailsPage(
       id: true,
       name: true,
       email: true,
-      emailVerified: true,
       role: true,
       banned: true,
       createdAt: true,
@@ -55,11 +37,11 @@ export default async function UserDetailsPage(
   return (
     <>
       <div className="mx-auto max-w-4xl space-y-10">
-        <div className="flex items-center justify-between">
-          <h1 className="text-4xl">User Details</h1>
+        <div className="flex items-center">
+          <h1 className="text-2xl sm:text-4xl">User Details</h1>
         </div>
 
-        <div className="flex max-w-6xl rounded-2xl border p-8">
+        <div className="flex max-w-6xl flex-col space-y-6 rounded-2xl border p-8 sm:flex-row">
           <div className="flex-1 space-y-0.5">
             <div className="flex items-center gap-3">
               <p className="mb-2 text-3xl">{user.name}</p>
@@ -115,11 +97,6 @@ export default async function UserDetailsPage(
           </div>
 
           <div className="flex items-center justify-between">
-            <span>Email Verified</span>
-            <span>{user.emailVerified ? "verified" : "unverified"}</span>
-          </div>
-
-          <div className="flex items-center justify-between">
             <span>Role</span>
             <span>{user.role}</span>
           </div>
@@ -139,7 +116,7 @@ export default async function UserDetailsPage(
             <span>{user.updatedAt.toLocaleDateString()}</span>
           </div>
 
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col items-start sm:flex-row sm:justify-between">
             <span>User ID</span>
             <span>{user.id}</span>
           </div>

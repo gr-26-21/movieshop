@@ -1,7 +1,6 @@
 import prisma from "@/lib/prisma";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
-import { redirect, notFound } from "next/navigation";
+import { requireAdmin } from "@/lib/auth-helpers";
+import { notFound } from "next/navigation";
 import { buttonVariants } from "@/components/ui/button";
 import Link from "next/link";
 import SoftDeleteMovieButton from "./_components/movie-delete-button";
@@ -10,20 +9,7 @@ export default async function MovieDetailsPage(
   props: PageProps<"/admin/movies/[movieId]">
 ) {
   // Control login
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (!session) {
-    redirect("/login");
-  }
-
-  // Control admin login
-  const roles = session.user.role?.split(",").map((role) => role.trim()) ?? [];
-
-  if (!roles.includes("admin")) {
-    redirect("/");
-  }
+  await requireAdmin();
 
   // Get movie ID
   const params = await props.params;
@@ -67,8 +53,13 @@ export default async function MovieDetailsPage(
           </div>
         ))}
       </div>
-
       <div className="flex gap-2">
+        <Link
+          href={`/admin/movies/`}
+          className={buttonVariants({ variant: "outline" })}
+        >
+          Back to movies
+        </Link>
         <Link
           href={`/admin/movies/${movie.id}/update`}
           className={buttonVariants({ variant: "outline" })}

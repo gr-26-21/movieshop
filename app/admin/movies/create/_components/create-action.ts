@@ -3,8 +3,7 @@
 import { PersonRole } from "@/generated/prisma/enums";
 import prisma from "@/lib/prisma";
 import { TMDBCastCredits, TMDBCrewCredits } from "@/types/tmdb";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
+import { getAdminSession } from "@/lib/auth-helpers";
 import { z } from "zod";
 
 // --- MOVIES ---
@@ -84,6 +83,14 @@ type CreatePersonInput = { name: string };
 
 //untested but should create a new person
 export async function createPerson(input: CreatePersonInput) {
+  // -----Control admin access for unautchenticated, forbidden or if authorized to protect server actions-----
+  const adminSession = await getAdminSession();
+
+  if (adminSession.status !== "authorized") {
+    return null;
+  }
+  // ---------------------------------------------------------------------------------------------------------
+
   let personId: string;
   try {
     const person = await prisma.person.create({
@@ -121,6 +128,13 @@ export async function connectPersonToMovie(
   movieId: string,
   role: PersonRole
 ) {
+  // Control admin access
+  const adminSession = await getAdminSession();
+
+  if (adminSession.status !== "authorized") {
+    return;
+  }
+
   try {
     await prisma.movie.update({
       where: {
@@ -148,6 +162,13 @@ export async function connectPersonToMovie(
 
 //enter genre name to create, or update if already existing, case-insensitive.
 export async function createOrUpdateGenre(name: string, description?: string) {
+  // Control admin access
+  const adminSession = await getAdminSession();
+
+  if (adminSession.status !== "authorized") {
+    return null;
+  }
+
   const genreName = await formatInputToUppercaseFirst(name);
   try {
     await prisma.genre.upsert({
@@ -201,6 +222,13 @@ export async function findGenreById(genreId: string) {
 
 //connects genre to a movie using the id from both respectively
 export async function connectGenreToMovie(name: string, movieId: string) {
+  // Control admin access
+  const adminSession = await getAdminSession();
+
+  if (adminSession.status !== "authorized") {
+    return null;
+  }
+
   const genreName = await formatInputToUppercaseFirst(name);
   try {
     await prisma.movie.update({

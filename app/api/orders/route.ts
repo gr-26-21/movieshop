@@ -3,6 +3,46 @@ import { createOrderSchema } from "@/lib/schemas/order.schema";
 import prisma from "@/lib/prisma";
 import { Prisma } from "@/generated/prisma/client";
 import { auth } from "@/lib/auth";
+import type { output } from "zod";
+
+type OrderRequest = output<typeof createOrderSchema>;
+
+type ExistingOrder = {
+  userId: string | null;
+  customerName: string;
+  customerEmail: string;
+  shippingName: string;
+  shippingStreet: string;
+  shippingPostalCode: string;
+  shippingCity: string;
+  items: { movieId: string; quantity: number }[];
+};
+
+function matchesExistingOrder(
+  order: ExistingOrder,
+  { customer, items }: OrderRequest,
+  userId: string | null
+) {
+  const sameCustomer =
+    order.userId === userId &&
+    order.customerName === customer.name &&
+    order.customerEmail === customer.email &&
+    order.shippingName === customer.name &&
+    order.shippingStreet === customer.address &&
+    order.shippingPostalCode === customer.postcode &&
+    order.shippingCity === customer.city;
+
+  const sameItems =
+    order.items.length === items.length &&
+    items.every((item) =>
+      order.items.some(
+        (savedItem) =>
+          savedItem.movieId === item.id && savedItem.quantity === item.quantity
+      )
+    );
+
+  return sameCustomer && sameItems;
+}
 
 export async function POST(request: Request) {
   const session = await auth.api.getSession({
@@ -69,25 +109,13 @@ export async function POST(request: Request) {
     });
 
     if (existingOrder) {
-      const sameCustomer =
-        existingOrder.userId === (session?.user.id ?? null) &&
-        existingOrder.customerName === customer.name &&
-        existingOrder.customerEmail === customer.email &&
-        existingOrder.shippingName === customer.name &&
-        existingOrder.shippingStreet === customer.address &&
-        existingOrder.shippingPostalCode === customer.postcode &&
-        existingOrder.shippingCity === customer.city;
-
-      const sameItems =
-        existingOrder.items.length === result.data.items.length &&
-        result.data.items.every((item) =>
-          existingOrder.items.some(
-            (savedItem) =>
-              savedItem.movieId === item.id &&
-              savedItem.quantity === item.quantity
-          )
-        );
-      if (!sameCustomer || !sameItems) {
+      if (
+        !matchesExistingOrder(
+          existingOrder,
+          result.data,
+          session?.user.id ?? null
+        )
+      ) {
         return NextResponse.json(
           { error: "This idempotency key belongs to a different order." },
           { status: 409 }
@@ -175,6 +203,7 @@ export async function POST(request: Request) {
         data: {
           idempotencyKey,
           userId: session?.user.id ?? null,
+          // Checkout simulates payment, so new orders are marked as paid.
           status: "PAID",
           customerName: customer.name,
           customerEmail: customer.email,
@@ -261,26 +290,13 @@ export async function POST(request: Request) {
         );
       }
 
-      const sameCustomer =
-        existingOrder.userId === (session?.user.id ?? null) &&
-        existingOrder.customerName === customer.name &&
-        existingOrder.customerEmail === customer.email &&
-        existingOrder.shippingName === customer.name &&
-        existingOrder.shippingStreet === customer.address &&
-        existingOrder.shippingPostalCode === customer.postcode &&
-        existingOrder.shippingCity === customer.city;
-
-      const sameItems =
-        existingOrder.items.length === result.data.items.length &&
-        result.data.items.every((item) =>
-          existingOrder.items.some(
-            (savedItem) =>
-              savedItem.movieId === item.id &&
-              savedItem.quantity === item.quantity
-          )
-        );
-
-      if (!sameCustomer || !sameItems) {
+      if (
+        !matchesExistingOrder(
+          existingOrder,
+          result.data,
+          session?.user.id ?? null
+        )
+      ) {
         return NextResponse.json(
           { error: "This idempotency key belongs to a different order." },
           { status: 409 }
@@ -313,7 +329,10 @@ export async function POST(request: Request) {
     }
     if (error instanceof Error && error.message === "MOVIE_NOT_FOUND") {
       return NextResponse.json(
-        { error: "One or more movies are no longer available. Please reload checkout to update your cart." },
+        {
+          error:
+            "One or more movies are no longer available. Please reload checkout to update your cart.",
+        },
         { status: 400 }
       );
     }
@@ -342,26 +361,13 @@ export async function POST(request: Request) {
         },
       });
       if (existingOrder) {
-        const sameCustomer =
-          existingOrder.userId === (session?.user.id ?? null) &&
-          existingOrder.customerName === customer.name &&
-          existingOrder.customerEmail === customer.email &&
-          existingOrder.shippingName === customer.name &&
-          existingOrder.shippingStreet === customer.address &&
-          existingOrder.shippingPostalCode === customer.postcode &&
-          existingOrder.shippingCity === customer.city;
-
-        const sameItems =
-          existingOrder.items.length === result.data.items.length &&
-          result.data.items.every((item) =>
-            existingOrder.items.some(
-              (savedItem) =>
-                savedItem.movieId === item.id &&
-                savedItem.quantity === item.quantity
-            )
-          );
-
-        if (sameCustomer && sameItems) {
+        if (
+          matchesExistingOrder(
+            existingOrder,
+            result.data,
+            session?.user.id ?? null
+          )
+        ) {
           return NextResponse.json(
             {
               success: true,

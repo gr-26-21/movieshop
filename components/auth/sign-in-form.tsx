@@ -54,7 +54,7 @@ export function SignInForm() {
       if (userRole === "admin") {
         router.push("/admin/");
       } else {
-        router.push("/user/");
+        router.push("/");
       }
 
       router.refresh();

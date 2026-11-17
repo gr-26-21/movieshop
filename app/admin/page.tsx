@@ -1,28 +1,25 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Film, ShoppingCart, Users, Wallet } from "lucide-react";
-import UserCounter from "./_components/user-counter";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
-import { canAccessAdmin } from "@/lib/check-permissions";
+import { requireAdmin } from "@/lib/auth-helpers";
+import {
+  getTotalUsers,
+  getTotalMovies,
+  getTotalOrders,
+  getTotalRevenue,
+} from "@/app/admin/_components/stats";
 
-
-
+// A page component for the admin dashboard showing statistics like total users, movies, orders, and revenue
 export default async function AdminDashboard() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+await requireAdmin();
 
-  if (!session) {
-    redirect("/login");
-  }
-
-  const allowed = await canAccessAdmin(session.user.id);
-
-  if (!allowed) {
-    redirect("/");
-  }
+  const [totalUsers, totalMovies, totalOrders, totalRevenue] =
+    await Promise.all([
+      getTotalUsers(),
+      getTotalMovies(),
+      getTotalOrders(),
+      getTotalRevenue(),
+    ]);
 
   return (
     <>
@@ -38,9 +35,7 @@ export default async function AdminDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-center text-3xl">
-              <UserCounter />
-            </p>
+            <p className="text-center text-3xl">{totalUsers}</p>
           </CardContent>
         </Card>
         {/* total no. of movies */}
@@ -54,7 +49,7 @@ export default async function AdminDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-center text-3xl">500</p>
+            <p className="text-center text-3xl">{totalMovies}</p>
           </CardContent>
         </Card>
         {/* total no. of orders */}
@@ -68,7 +63,7 @@ export default async function AdminDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-center text-3xl">999</p>
+            <p className="text-center text-3xl">{totalOrders}</p>
           </CardContent>
         </Card>
 
@@ -83,7 +78,7 @@ export default async function AdminDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-center text-3xl">5000 SEK</p>
+            <p className="text-center text-3xl">{totalRevenue} SEK</p>
           </CardContent>
         </Card>
       </div>

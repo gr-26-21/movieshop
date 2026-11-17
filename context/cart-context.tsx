@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
 import type { Product } from "@/types/product";
+import { toast } from "@/components/ui/toast";
 
 /**
  * En produkt i varukorgen tillsammans med antalet.
@@ -235,31 +236,32 @@ export function CartProvider({ children }: CartProviderProps) {
    * Om produkten redan finns ökas antalet med ett.
    */
   function addToCart(product: Product) {
+    const existingItem = cart.find((item) => item.id === product.id);
+
+    if ((existingItem?.quantity ?? 0) >= product.stock) {
+      toast.add({ title: "No more copies available", type: "error" });
+      return;
+    }
+
     setCart((currentCart) => {
-      if (product.stock <= 0) {
+      const item = currentCart.find((entry) => entry.id === product.id);
+
+      if (!item) {
+        return [...currentCart, { ...product, quantity: 1 }];
+      }
+
+      if (item.quantity >= product.stock) {
         return currentCart;
       }
 
-      const existingItem = currentCart.find((item) => item.id === product.id);
-
-      if (existingItem) {
-        if (existingItem.quantity >= product.stock) {
-          return currentCart;
-        }
-
-        return currentCart.map((item) =>
-          item.id === product.id
-            ? {
-                ...item,
-                stock: product.stock,
-                quantity: item.quantity + 1,
-              }
-            : item
-        );
-      }
-
-      return [...currentCart, { ...product, quantity: 1 }];
+      return currentCart.map((entry) =>
+        entry.id === product.id
+          ? { ...entry, stock: product.stock, quantity: entry.quantity + 1 }
+          : entry
+      );
     });
+
+    toast.add({ title: `${product.title} added to cart`, type: "success" });
   }
 
   /**
@@ -292,9 +294,15 @@ export function CartProvider({ children }: CartProviderProps) {
    * Tar bort en produkt helt från varukorgen.
    */
   function removeFromCart(productId: string) {
+    const item = cart.find((entry) => entry.id === productId);
+
+    if (!item) return;
+
     setCart((currentCart) =>
-      currentCart.filter((item) => item.id !== productId)
+      currentCart.filter((entry) => entry.id !== productId)
     );
+
+    toast.add({ title: `${item.title} removed from cart`, type: "success" });
   }
 
   /**

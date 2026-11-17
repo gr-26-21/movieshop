@@ -4,6 +4,16 @@ const nextConfig: NextConfig = {
   experimental: {
     agentUpgrade: "security",
   },
+
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "image.tmdb.org",
+        pathname: "/t/p/**",
+      },
+    ],
+  },
 };
 
 export default nextConfig;

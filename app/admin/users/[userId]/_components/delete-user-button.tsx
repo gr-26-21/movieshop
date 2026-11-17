@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
 
+// A component for displaying a button to soft delete (deactivate) a user
 export default function SoftDeleteUserButton({ userId }: { userId: string }) {
   const [loading, setLoading] = useState(false);
   const router = useRouter();

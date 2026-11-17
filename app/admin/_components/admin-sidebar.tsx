@@ -9,6 +9,7 @@ import {
 import { Film, House, ShieldUser, ShoppingCart, Users } from "lucide-react";
 import Link from "next/link";
 
+// A component for displaying the admin sidebar with navigation links
 export default function AdminSidebar() {
   return (
     <>

@@ -46,7 +46,7 @@ export default function RootLayout({
             <StoreNavigation>
               <MainNavbar />
             </StoreNavigation>
-            {children}
+            <div className="min-w-[320px]">{children}</div>
             <Toaster />
           </CartProvider>
         </ThemeProvider>
