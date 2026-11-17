@@ -35,7 +35,7 @@ export default async function MovieDetailsPage({
         title={movie.title}
         price={movie.price}
         releaseDate={movie.releaseDate.getFullYear()}
-        imgURL={null}
+        imgURL={movie.imageUrl}
         actions={
           <div className="w-full space-y-3">
             <p>{movie.description}</p>
