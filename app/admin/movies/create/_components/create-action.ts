@@ -2,7 +2,6 @@
 
 import { PersonRole } from "@/generated/prisma/enums";
 import prisma from "@/lib/prisma";
-import { TMDBCastCredits, TMDBCrewCredits } from "@/types/tmdb";
 import { getAdminSession } from "@/lib/auth-helpers";
 import { z } from "zod";
 
@@ -22,25 +21,9 @@ const createMovieSchema = z.object({
 });
 
 export async function checkAdmin() {
-  // Control login
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (!session) {
-    console.error("Error: Session not found");
-    return false;
-  }
-
-  // Control Admin role
-  const roles = session.user.role?.split(",").map((role) => role.trim()) ?? [];
-
-  if (!roles.includes("admin")) {
-    console.error("Error: User not administrator");
-    return false;
-  }
+  const result = await getAdminSession();
+  return result.status === "authorized";
 }
-
 type CreateMovieInput = z.input<typeof createMovieSchema>;
 
 //creates a movie with input either from a tmdb data or a manual form
