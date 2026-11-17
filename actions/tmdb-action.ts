@@ -230,7 +230,7 @@ export default async function TMDBAddAndConnectAllByMovieId(
   stock: number
 ) {
   //unreliable fail-safe in case genre was not seeded properly
-  TMDBGenreCheck();
+  await TMDBGenreCheck();
   try {
     //fetch data from tmdb and convert it to the format of our database
     const fetchResult = await TMDBGetMovieAndCreditsById(tmdbId);
@@ -288,8 +288,75 @@ export default async function TMDBAddAndConnectAllByMovieId(
     console.error(
       "Failed to add movie with TMDBID: '" + tmdbId + "'. Error:" + error
     );
-    return "Chain Broke, error:" + error;
+    return false; //what would be good to return here?
   }
+}
+
+// --- SEEDING FUNCTIONS ---
+
+export async function TMDBSeedMoviesFromIdList(input: number[]) {
+  try {
+    input.map(async (movie) => {
+      TMDBAddAndConnectAllByMovieId(movie, 299, 1);
+    });
+    console.log("Seeding successful!");
+    return true;
+  } catch (error) {
+    console.error("Seeding failed. Error: " + error);
+    return false; //how to make it keep running even if a movie fails to add until it's completed the list?
+  }
+}
+
+export async function TMDBGetPopularMovies() {
+  try {
+    const root: Promise<TMDBMovieSearchRoot> = (
+      await fetch(`${BASE_URL}/movie/popular`, options)
+    ).json();
+    const movies = (await root).results;
+    const idList = movies.map((movie) => {
+      return movie.id;
+    });
+    return idList;
+  } catch (error) {
+    console.error("Fetch popular movies failed: " + error);
+  }
+}
+
+export async function TMDBSeedPopularMovies() {
+  const movies = await TMDBGetPopularMovies();
+  if (!movies) {
+    console.error(
+      "Error: TMDBGetPopularMovies() failed to compile list of IDs"
+    );
+    return false;
+  }
+  return await TMDBSeedMoviesFromIdList(movies);
+}
+
+export async function TMDBGetTopRatedMovies() {
+  try {
+    const root: Promise<TMDBMovieSearchRoot> = (
+      await fetch(`${BASE_URL}/movie/top_rated`, options)
+    ).json();
+    const movies = (await root).results;
+    const idList = movies.map((movie) => {
+      return movie.id;
+    });
+    return idList;
+  } catch (error) {
+    console.error("Fetch popular movies failed: " + error);
+  }
+}
+
+export async function TMDBSeedTopRatedMovies() {
+  const movies = await TMDBGetTopRatedMovies();
+  if (!movies) {
+    console.error(
+      "Error: TMDBGetPopularMovies() failed to compile list of IDs"
+    );
+    return false;
+  }
+  return await TMDBSeedMoviesFromIdList(movies);
 }
 
 // may be redundant
