@@ -36,7 +36,6 @@ export default async function UserDetailsPage(
       id: true,
       name: true,
       email: true,
-      emailVerified: true,
       role: true,
       banned: true,
       createdAt: true,
@@ -111,11 +110,6 @@ export default async function UserDetailsPage(
           <div className="flex items-center justify-between">
             <span>Email</span>
             <span>{user.email}</span>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <span>Email Verified</span>
-            <span>{user.emailVerified ? "verified" : "unverified"}</span>
           </div>
 
           <div className="flex items-center justify-between">

@@ -2,6 +2,15 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export default async function OrdersPage() {
   const session = await auth.api.getSession({
@@ -35,42 +44,38 @@ export default async function OrdersPage() {
         <p className="mt-4 text-muted-foreground">No orders yet.</p>
       ) : (
         <div className="mt-4 overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="border-b">
-                <th scope="col" className="p-3">
-                  Order
-                </th>
-                <th scope="col" className="p-3">
-                  Date
-                </th>
-                <th scope="col" className="p-3">
-                  Customer
-                </th>
-                <th scope="col" className="p-3">
-                  Status
-                </th>
-                <th scope="col" className="p-3 text-right">
-                  Total
-                </th>
-              </tr>
-            </thead>
-            <tbody>
+          <Table>
+            <TableCaption>A list of orders</TableCaption>
+            <TableHeader className="text-xl">
+              <TableRow>
+                <TableHead className="hidden sm:table-cell">Order Id</TableHead>
+                <TableHead>Customer</TableHead>
+                <TableHead className="hidden sm:table-cell">Date</TableHead>
+
+                <TableHead>Status</TableHead>
+                <TableHead>Total</TableHead>
+              </TableRow>
+            </TableHeader>
+
+            <TableBody>
               {orders.map((order) => (
-                <tr key={order.id} className="border-b">
-                  <td className="p-3">{order.id}</td>
-                  <td className="p-3">
-                    {order.createdAt.toLocaleDateString("sv-SE")}
-                  </td>
-                  <td className="p-3">{order.customerName}</td>
-                  <td className="p-3">{order.status}</td>
-                  <td className="p-3 text-right whitespace-nowrap">
-                    {order.totalAmount} kr
-                  </td>
-                </tr>
+                <TableRow key={order.id}>
+                  <TableCell className="hidden sm:table-cell">
+                    <div className="flex flex-row items-center gap-1">
+                      <span>{order.id}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>{order.customerName}</TableCell>
+                  <TableCell className="hidden sm:table-cell">
+                    {order.createdAt.toLocaleDateString()}
+                  </TableCell>
+
+                  <TableCell>{order.status}</TableCell>
+                  <TableCell>{order.totalAmount} kr</TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       )}
     </section>
