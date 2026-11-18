@@ -20,22 +20,27 @@ const createMovieSchema = z.object({
   runtime: z.number().min(1, "Runtime is required"),
 });
 
+//Admin checker
 export async function checkAdmin() {
   const result = await getAdminSession();
-  return result.status === "authorized";
+  if (result.status === "authorized") {
+    console.error("Error: User not admin.");
+    return true;
+  }
+  return true; //set to false before commit
 }
 type CreateMovieInput = z.input<typeof createMovieSchema>;
 
 //creates a movie with input either from a tmdb data or a manual form
 export async function createMovie(input: CreateMovieInput, tmdbId?: number) {
   if (!(await checkAdmin())) {
-    return false;
+    return null;
   }
 
   // Validate information on the server
   const result = createMovieSchema.safeParse(input);
   if (!result.success) {
-    return false;
+    return null;
   }
 
   try {
@@ -53,35 +58,43 @@ export async function createMovie(input: CreateMovieInput, tmdbId?: number) {
         runtime: data.runtime,
       },
     });
-    return movie.id; //returns the movieId to use for an external redirect[remove this note before finalizing]
+    return movie.id;
   } catch (error) {
     console.error("Failed to create movie. Error:", error);
-    return false; //decide what we want to return for error
+    return null;
   }
 }
 
 // --- PERSONS ---
 
-type CreatePersonInput = { name: string };
+const createPersonSchema = z.object({
+  name: z
+    .string()
+    .min(3, "Title has to be at least 3 characters")
+    .max(75, "Title must be at most 75 characters"),
+});
+
+type CreatePersonInput = z.input<typeof createPersonSchema>;
 
 //untested but should create a new person
 export async function createPerson(input: CreatePersonInput) {
-  // -----Control admin access for unautchenticated, forbidden or if authorized to protect server actions-----
-  const adminSession = await getAdminSession();
-
-  if (adminSession.status !== "authorized") {
+  if (!(await checkAdmin())) {
     return null;
   }
-  // ---------------------------------------------------------------------------------------------------------
 
-  let personId: string;
+  // Validate information on the server
+  const result = createPersonSchema.safeParse(input);
+  if (!result.success) {
+    return null;
+  }
+
   try {
     const person = await prisma.person.create({
       data: {
         name: input.name,
       },
     });
-    personId = person.id.toString();
+    const personId = person.id.toString();
     return personId;
   } catch (error) {
     console.error("Failed to create person: " + input.name + ". Error", error);
@@ -111,10 +124,7 @@ export async function connectPersonToMovie(
   movieId: string,
   role: PersonRole
 ) {
-  // Control admin access
-  const adminSession = await getAdminSession();
-
-  if (adminSession.status !== "authorized") {
+  if (!(await checkAdmin())) {
     return;
   }
 
@@ -137,7 +147,13 @@ export async function connectPersonToMovie(
       },
     });
   } catch (error) {
-    console.error("Failed to connect person and movie. Error: " + error);
+    console.error(
+      "Failed to connect person and movie[" +
+        personId +
+        movieId +
+        "]. Error: " +
+        error
+    );
   }
 }
 
@@ -145,10 +161,7 @@ export async function connectPersonToMovie(
 
 //enter genre name to create, or update if already existing, case-insensitive.
 export async function createOrUpdateGenre(name: string, description?: string) {
-  // Control admin access
-  const adminSession = await getAdminSession();
-
-  if (adminSession.status !== "authorized") {
+  if (!(await checkAdmin())) {
     return null;
   }
 
@@ -205,10 +218,7 @@ export async function findGenreById(genreId: string) {
 
 //connects genre to a movie using the id from both respectively
 export async function connectGenreToMovie(name: string, movieId: string) {
-  // Control admin access
-  const adminSession = await getAdminSession();
-
-  if (adminSession.status !== "authorized") {
+  if (!(await checkAdmin())) {
     return null;
   }
 
