@@ -217,10 +217,7 @@ export async function TMDBConvertMovieFormatToLocal(
 
     imageUrl: TMDBMovieResult.poster_path
       ? `https://image.tmdb.org/t/p/w500${TMDBMovieResult.poster_path}`
-      : "", 
-
-    imageUrl:
-      "https://image.tmdb.org/t/p/original" + TMDBMovieResult.poster_path,
+      : "",
 
     stock: stock,
     runtime: TMDBMovieResult.runtime,
