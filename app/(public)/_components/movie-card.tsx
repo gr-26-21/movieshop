@@ -20,6 +20,8 @@ export default function MovieCard({
   imgURL,
   actions,
   outOfStock = false,
+  href,
+  priority = false,
 }: {
   title: string;
   price: number;
@@ -27,18 +29,32 @@ export default function MovieCard({
   imgURL: string | null;
   actions?: React.ReactNode;
   outOfStock?: boolean;
+   href?: string;
+   priority?: boolean;
 }) {
+  const movieImage = (
+    <Image
+      src={imgURL || errorImg}
+      alt={title}
+      fill
+      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+      loading={priority ? "eager" : "lazy"}
+      className={
+        outOfStock ? "object-cover opacity-60 grayscale" : "object-cover"
+      }
+    />
+  ) ;
   return (
     <Card className="p-0 pb-6">
-      <CardHeader className="relative h-100 w-full overflow-hidden rounded-t-lg p-0">
-        <Image
-          src={imgURL || errorImg}
-          alt={title}
-          fill
-          className={
-            outOfStock ? "object-cover opacity-60 grayscale" : "object-cover"
-          }
-        />
+      <CardHeader className="relative h-[400px] w-full overflow-hidden rounded-t-lg p-0">
+         {href ? (
+          <Link href={href} className="absolute inset-0">
+            {movieImage}
+          </Link>
+         ) : (
+          movieImage
+        )}
+          
         {outOfStock && (
           <span className="absolute top-3 right-3 z-10 rounded-full bg-black/80 px-3 py-1 text-xs font-semibold text-white">
             Out of stock
@@ -64,3 +80,4 @@ export default function MovieCard({
     </Card>
   );
 }
+

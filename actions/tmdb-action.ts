@@ -117,7 +117,9 @@ export async function TMDBConvertMovieFormatToLocal(
     description: TMDBMovieResult.overview,
     price: price,
     releaseDate: TMDBMovieResult.release_date,
-    imageUrl: TMDBMovieResult.poster_path,
+    imageUrl: TMDBMovieResult.poster_path
+      ? `https://image.tmdb.org/t/p/w500${TMDBMovieResult.poster_path}`
+      : "", 
     stock: stock,
     runtime: TMDBMovieResult.runtime,
     tmdbid: TMDBMovieResult.id,

@@ -22,7 +22,6 @@ export default async function MovieDetailsPage({
       },
     },
   });
-console.log("Movie ID:", movieId, "Movie found:", !!movie);
   if (!movie) notFound();
 
   return (
@@ -35,7 +34,7 @@ console.log("Movie ID:", movieId, "Movie found:", !!movie);
         title={movie.title}
         price={movie.price}
         releaseDate={movie.releaseDate.getFullYear()}
-        imgURL={null} // Replace with actual image URL if available 
+        imgURL={movie.imageUrl} // Replace with actual image URL if available 
         actions={
           <div className="w-full space-y-3"> 
             <p>{movie.description}</p> 
