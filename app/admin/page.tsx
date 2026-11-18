@@ -11,7 +11,7 @@ import {
 
 // A page component for the admin dashboard showing statistics like total users, movies, orders, and revenue
 export default async function AdminDashboard() {
-await requireAdmin();
+  await requireAdmin();
 
   const [totalUsers, totalMovies, totalOrders, totalRevenue] =
     await Promise.all([
@@ -78,7 +78,7 @@ await requireAdmin();
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-center text-3xl">{totalRevenue} SEK</p>
+            <p className="text-center text-3xl">{totalRevenue} kr</p>
           </CardContent>
         </Card>
       </div>
