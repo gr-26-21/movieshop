@@ -22,7 +22,6 @@ export default async function MovieDetailsPage({
       },
     },
   });
-
   if (!movie) notFound();
 
   return (
@@ -36,11 +35,12 @@ export default async function MovieDetailsPage({
         price={movie.price}
         releaseDate={movie.releaseDate.getFullYear()}
         imgURL={movie.imageUrl}
+        
         actions={
-          <div className="w-full space-y-3">
-            <p>{movie.description}</p>
+          <div className="w-full space-y-3"> 
+            <p>{movie.description}</p> 
             <p>
-              Director:{" "}
+              Director:{" "} 
               {movie.persons.map(({ person }) => person.name).join(", ") ||
                 "No director"}
             </p>
