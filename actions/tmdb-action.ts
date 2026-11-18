@@ -1,12 +1,12 @@
 "use server";
 
 import {
+  checkAdmin,
   connectGenreToMovie,
   connectPersonToMovie,
   createMovie,
   formatInputToUppercaseFirst,
 } from "@/app/admin/movies/create/_components/create-action";
-import { getAdminSession } from "@/lib/auth-helpers";
 import prisma from "@/lib/prisma";
 import {
   TMDBCastCredits,
@@ -14,10 +14,9 @@ import {
   TMDBCrewCredits,
   TMDBGenreRoot,
   TMDBMovieAndCreditsRoot,
-  TMDBMovieCreditsRoot,
   TMDBMovieSearchRoot,
-  TMDBPersonDetails,
 } from "@/types/tmdb";
+import z from "zod";
 
 const BASE_URL = "https://api.themoviedb.org/3";
 const TMDB_KEY = process.env.TMDB_API_KEY;
@@ -32,17 +31,25 @@ const options = {
 // returns a list of movies with matching titles
 export async function TMDBGetMovieByQuery(
   query: string
-): Promise<TMDBMovieSearchRoot> {
-  const result = await fetch(
-    `${BASE_URL}/search/movie?query=${query}`,
-    options
-  );
-  return result.json();
+): Promise<TMDBMovieSearchRoot | null> {
+  if (!(await checkAdmin())) {
+    return null;
+  }
+  try {
+    const result = await fetch(
+      `${BASE_URL}/search/movie?query=${query}`,
+      options
+    );
+    return result.json();
+  } catch (error) {
+    console.error("TMDB search failed. Error: " + error);
+    return null;
+  }
 }
 
 // use with an int that is an id for a movie on TMDB
 // returns a movie object and a list of credits divided into cast and crew
-export async function TMDBGetMovieAndCreditsById(
+async function TMDBGetMovieAndCreditsById(
   movieId: number
 ): Promise<TMDBMovieAndCreditsRoot> {
   const result = await fetch(
@@ -52,31 +59,47 @@ export async function TMDBGetMovieAndCreditsById(
   return result.json();
 }
 
+//helper function to convert tmdb movie data to the format our db uses
+async function TMDBConvertMovieFormatToLocal(
+  TMDBMovieResult: TMDBMovieAndCreditsRoot,
+  price: number,
+  stock: number
+) {
+  const movie: TMDBCreateMovieConversion = {
+    title: TMDBMovieResult.title,
+    description: TMDBMovieResult.overview,
+    price: price,
+    releaseDate: TMDBMovieResult.release_date,
+    imageUrl:
+      "https://image.tmdb.org/t/p/original" + TMDBMovieResult.poster_path,
+    stock: stock,
+    runtime: TMDBMovieResult.runtime,
+    tmdbid: TMDBMovieResult.id,
+  };
+  return movie;
+}
+
 //helper function to compress this step in other functions
-export async function TMDBGetAndConvertMovieAndCreditsById(
+async function TMDBGetAndConvertMovieAndCreditsById(
   tmdbId: number,
   price: number,
   stock: number
 ) {
   const movie = await TMDBGetMovieAndCreditsById(tmdbId);
-  return TMDBConvertMovieFormatToLocal(movie, price, stock);
+  return {
+    movie: TMDBConvertMovieFormatToLocal(movie, price, stock),
+    credits: movie.credits,
+  };
 }
 
 // --- TMDB GENRE POPULATION ---
 
-export async function TMDBFetchGenres(): Promise<TMDBGenreRoot> {
+async function TMDBFetchGenres(): Promise<TMDBGenreRoot> {
   const result = await fetch(`${BASE_URL}/genre/movie/list`, options);
   return result.json();
 }
 
-export async function TMDBCreateGenre(name: string, tmdbId: number) {
-  // admin access-----
-  const adminSession = await getAdminSession();
-
-  if (adminSession.status !== "authorized") {
-    return;
-  }
-  //-----------------
+async function TMDBCreateGenre(name: string, tmdbId: number) {
   const genreName = await formatInputToUppercaseFirst(name);
   try {
     await prisma.genre.upsert({
@@ -127,21 +150,14 @@ export async function TMDBGenreCheck() {
 // --- TMDB CREATE AND CONNECT FUNCTIONS ---
 
 //helper function to compress
-export async function TMDBCreateMovie(movie: TMDBCreateMovieConversion) {
+async function TMDBCreateMovie(movie: TMDBCreateMovieConversion) {
   return createMovie(movie, movie.tmdbid);
 }
 
 type CreatePersonInput = { tmdbid: number; name: string };
 
 //creates a person with data from a tmdb response
-export async function TMDBcreatePerson(input: CreatePersonInput) {
-  // admin access--------
-  const adminSession = await getAdminSession();
-
-  if (adminSession.status !== "authorized") {
-    return "0";
-  }
-  // ----------------------
+async function TMDBcreatePerson(input: CreatePersonInput) {
   let personId: string;
   try {
     const person = await prisma.person.upsert({
@@ -163,7 +179,7 @@ export async function TMDBcreatePerson(input: CreatePersonInput) {
 }
 
 //adds cast from tmdb credits to a movie and returns a list of person IDs
-export async function TMDBcreateAndConnectCastFromCredits(
+async function TMDBcreateAndConnectCastFromCredits(
   credits: TMDBCastCredits[],
   movieId: string
 ) {
@@ -184,7 +200,7 @@ export async function TMDBcreateAndConnectCastFromCredits(
 
 //adds crew from tmdb credits to a movie and returns a list of person IDs
 //made so that "DIRECTOR" could be changed to "CREW" to allow other crew jobs than director
-export async function TMDBcreateAndConnectCrewFromCredits(
+async function TMDBcreateAndConnectCrewFromCredits(
   credits: TMDBCrewCredits[],
   movieId: string
 ) {
@@ -203,28 +219,8 @@ export async function TMDBcreateAndConnectCrewFromCredits(
   }
 }
 
-//helper function to convert tmdb movie data to the format our db uses
-export async function TMDBConvertMovieFormatToLocal(
-  TMDBMovieResult: TMDBMovieAndCreditsRoot,
-  price: number,
-  stock: number
-) {
-  const movie: TMDBCreateMovieConversion = {
-    title: TMDBMovieResult.title,
-    description: TMDBMovieResult.overview,
-    price: price,
-    releaseDate: TMDBMovieResult.release_date,
-    imageUrl:
-      "https://image.tmdb.org/t/p/original" + TMDBMovieResult.poster_path,
-    stock: stock,
-    runtime: TMDBMovieResult.runtime,
-    tmdbid: TMDBMovieResult.id,
-  };
-  return movie;
-}
-
 //helper function to filter out directors from crew
-export async function TMDBFilterDirector(
+async function TMDBFilterDirector(
   crewList: TMDBCrewCredits[]
 ): Promise<TMDBCrewCredits[] | false> {
   const directors = crewList.filter((result) => result.job === "Director");
@@ -235,32 +231,47 @@ export async function TMDBFilterDirector(
   return directors;
 }
 
+const TMDBAddMovieSchema = z.object({
+  tmdbId: z.number().min(1, "TMDB ID is required"),
+  price: z.number().min(1, "Price is required"),
+  stock: z.number().min(1, "Stock is required"),
+});
+
+type TMDBAddMovieInput = z.input<typeof TMDBAddMovieSchema>;
+
 //one big function that takes the tmdb id of a movie, price, and stock
 // to add and connect everything relating to that movie
 //NOTE: make sure "await TMDBSeedGenre" has run before this function can be used
 // to avoid missing genres
 export default async function TMDBAddAndConnectAllByMovieId(
-  tmdbId: number,
-  price: number,
-  stock: number
+  input: TMDBAddMovieInput
 ) {
-  //unreliable fail-safe in case genre was not seeded properly
+  if (!(await checkAdmin())) {
+    return null;
+  }
+
+  const result = TMDBAddMovieSchema.safeParse(input);
+  if (!result.success) {
+    return null;
+  }
+
+  //unreliable fail-safe in case genres were not seeded properly
   await TMDBGenreCheck();
   try {
     //fetch data from tmdb and convert it to the format of our database
-    const fetchResult = await TMDBGetMovieAndCreditsById(tmdbId);
+    const fetchResult = await TMDBGetMovieAndCreditsById(input.tmdbId);
     const genres = fetchResult.genres;
     const preparedMovie = await TMDBConvertMovieFormatToLocal(
       fetchResult,
-      price,
-      stock
+      input.price,
+      input.stock
     );
 
     //create movie
     const movieId = await TMDBCreateMovie(preparedMovie);
     if (!movieId) {
-      console.error("Movie creation failed of ID: " + tmdbId);
-      return "Movie creation failed of ID: " + tmdbId;
+      console.error("Movie creation failed of ID: " + input.tmdbId);
+      return "Movie creation failed of ID: " + input.tmdbId;
     }
 
     //add cast to movie
@@ -289,7 +300,6 @@ export default async function TMDBAddAndConnectAllByMovieId(
 
     //add genres to movie
     const genre = genres.map(async (genre) => {
-      //why does it only console.log the first genre added?
       return await connectGenreToMovie(genre.name, movieId);
     });
     if (!genre) {
@@ -301,9 +311,9 @@ export default async function TMDBAddAndConnectAllByMovieId(
     return movieId;
   } catch (error) {
     console.error(
-      "Failed to add movie with TMDBID: '" + tmdbId + "'. Error:" + error
+      "Failed to add movie with TMDBID: '" + input.tmdbId + "'. Error:" + error
     );
-    return false; //what would be good to return here?
+    return null; //what would be good to return here?
   }
 }
 
@@ -311,14 +321,23 @@ export default async function TMDBAddAndConnectAllByMovieId(
 
 export async function TMDBSeedMoviesFromIdList(input: number[]) {
   try {
-    input.map(async (movie) => {
-      TMDBAddAndConnectAllByMovieId(movie, 299, 1);
+    const addedId = input.map(async (movie) => {
+      const id = await TMDBAddAndConnectAllByMovieId({
+        tmdbId: movie,
+        price: 299,
+        stock: 1,
+      });
+      if (id) {
+        return id.toString();
+      } else {
+        return "noid";
+      }
     });
-    console.log("Seeding successful!");
+    const count = addedId.filter(() => "noid");
+    console.log("Seeding successful! Added " + count.keys() + "movies.");
     return true;
   } catch (error) {
     console.error("Seeding failed. Error: " + error);
-    return false; //how to make it keep running even if a movie fails to add until it's completed the list?
   }
 }
 
@@ -372,24 +391,4 @@ export async function TMDBSeedTopRatedMovies() {
     return false;
   }
   return await TMDBSeedMoviesFromIdList(movies);
-}
-
-// may be redundant
-// use with an int that is an id for a movie on TMDB
-// returns a list of credits divided into cast and crew
-export async function TMDBGetMovieCreditsById(
-  movieId: number
-): Promise<TMDBMovieCreditsRoot> {
-  const result = await fetch(`${BASE_URL}/movie/${movieId}/credits`, options);
-  return result.json();
-}
-
-// may be redundant
-// use with an int that is an id for a person on TMDB
-// returns an object with details of the person
-export async function TMDBGetPersonDetailsById(
-  personId: number
-): Promise<TMDBPersonDetails> {
-  const result = await fetch(`${BASE_URL}/person/${personId}`, options);
-  return result.json();
 }
