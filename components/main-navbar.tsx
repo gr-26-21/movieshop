@@ -15,41 +15,44 @@ export default async function MainNavbar() {
   });
 
   return (
-    <nav className="mt-5 mb-8 flex h-16 flex-col items-center justify-between gap-4 px-4 sm:h-20 sm:flex-row sm:px-6 lg:px-15">
-      {/* logo */}
-      <div className="flex flex-2 flex-row items-center justify-between gap-4">
+    <nav className="mt-8 mb-10 flex w-full flex-col items-center gap-4 px-4 sm:flex-row sm:justify-between sm:px-12 lg:px-16">
+      {/* Logo */}
+      <div className="flex items-center">
         <Link href={"/"}>
           <h1 className="text-2xl font-bold sm:text-4xl">MovieShop</h1>
         </Link>
-        <div>
-          {/* search bar */}
-          <div className="flex items-center gap-2">
-            <CartLink />
-            <SearchMovieByName />
-          </div>
-        </div>
       </div>
 
-      {/* sign-in, sign-up */}
-      <div className="flex w-full flex-col items-center justify-between gap-4 rounded-lg sm:w-auto sm:flex-row sm:gap-8">
-        <div className="flex gap-2">
+      {/* Search bar */}
+      <div className="mx-auto w-full max-w-xl px-4 sm:px-6 lg:max-w-2xl lg:flex-1 lg:px-8">
+        <SearchMovieByName />
+      </div>
+
+      {/* Sign-in, sign-up / User actions */}
+      <div className="flex w-full flex-col items-center justify-center gap-4 rounded-lg sm:w-auto sm:flex-row sm:gap-4">
+        <div className="flex items-center gap-2">
           {session ? (
             <>
               {session.user.role !== "admin" && (
-                <Link
-                  href="/user"
-                  className={buttonVariants({ variant: "outline" })}
-                >
-                  My account
-                </Link>
+                <>
+                  <CartLink />
+
+                  <Link
+                    href="/user"
+                    className={buttonVariants({ variant: "outline" })}
+                  >
+                    My account
+                  </Link>
+                </>
               )}
               <SignOutButton />
             </>
           ) : (
-            <>
+            <div className="flex items-center gap-2">
               <SignInForm />
               <RegisterForm />
-            </>
+              <CartLink />
+            </div>
           )}
         </div>
       </div>

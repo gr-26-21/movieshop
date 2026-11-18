@@ -5,29 +5,13 @@ import { CalendarDays, Edit, Mail, User } from "lucide-react";
 import Link from "next/link";
 import SoftDeleteUserButton from "./_components/delete-user-button";
 import RestoreUserButton from "./_components/restore-user-button";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
+import { requireAdmin } from "@/lib/auth-helpers";
 
 // A page component for displaying user details in the admin dashboard
 export default async function UserDetailsPage(
   props: PageProps<"/admin/users/[userId]">
 ) {
-  // Controll logged in user
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  // Not logged in
-  if (!session) {
-    redirect("/login");
-  }
-
-  // Controll admin role
-  const roles = session.user.role?.split(",").map((role) => role.trim()) ?? [];
-
-  if (!roles.includes("admin")) {
-    redirect("/");
-  }
+  await requireAdmin();
 
   const { userId } = await props.params;
 
@@ -36,7 +20,6 @@ export default async function UserDetailsPage(
       id: true,
       name: true,
       email: true,
-      emailVerified: true,
       role: true,
       banned: true,
       createdAt: true,
@@ -111,11 +94,6 @@ export default async function UserDetailsPage(
           <div className="flex items-center justify-between">
             <span>Email</span>
             <span>{user.email}</span>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <span>Email Verified</span>
-            <span>{user.emailVerified ? "verified" : "unverified"}</span>
           </div>
 
           <div className="flex items-center justify-between">

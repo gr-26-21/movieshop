@@ -1,8 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
+import { getAdminSession } from "@/lib/auth-helpers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
@@ -28,21 +27,12 @@ export async function updateMovie(
   input: UpdateMovieInput,
   shouldRedirect = true
 ) {
-  // Control Login
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+// Control admin access
+const adminSession = await getAdminSession();
 
-  if (!session) {
-    return false;
-  }
-
-  // Control admin role
-  const roles = session.user.role?.split(",").map((role) => role.trim()) ?? [];
-
-  if (!roles.includes("admin")) {
-    return false;
-  }
+if (adminSession.status !== "authorized") {
+  return false;
+}
 
   // Validate information on the server
   const result = updateMovieSchema.safeParse(input);

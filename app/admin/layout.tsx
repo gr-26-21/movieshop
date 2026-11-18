@@ -1,8 +1,6 @@
 import AdminSidebar from "@/app/admin/_components/admin-sidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+import { requireAdmin } from "@/lib/auth-helpers";
 
 //
 export default async function AdminLayout({
@@ -10,17 +8,7 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (!session) {
-    redirect("/");
-  }
-
-  if (session.user.role !== "admin") {
-    redirect("/user");
-  }
+  const session = await requireAdmin();
 
   return (
     <SidebarProvider>
@@ -28,7 +16,7 @@ export default async function AdminLayout({
       <main className="flex-1">
         <header className="mb-8 flex items-center justify-between border-b px-3 py-4">
           <SidebarTrigger />
-          <span>logged in as {session?.user?.role}</span>
+          <span className="pr-8">logged in as {session?.user?.role}</span>
         </header>
 
         <div className="p-5">{children}</div>

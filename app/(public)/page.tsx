@@ -20,7 +20,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <div className="px-6 sm:px-12 lg:px-15">
+      <div className="mt-12 px-6 sm:mt-5 sm:px-12 lg:px-15">
         <div className="my-5 flex w-full px-9 sm:items-center sm:justify-end">
           <Link
             href="/movies"
