@@ -78,7 +78,7 @@ export default async function AdminDashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-center text-3xl">{totalRevenue} Kr</p>
+            <p className="text-center text-3xl">{totalRevenue} kr</p>
           </CardContent>
         </Card>
       </div>
