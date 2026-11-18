@@ -22,6 +22,8 @@ export default function SelectedMovies({
                 price={movie.price}
                 releaseDate={movie.releaseDate.getFullYear()}
                 imgURL={movie.imageUrl}
+                priority={moviesList[0]?.id === movie.id}
+                href={`/movies/${movie.id}`}
                 outOfStock={movie.stock <= 0}
                 actions={
                   <AddToCartButton
