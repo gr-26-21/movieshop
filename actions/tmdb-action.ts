@@ -149,7 +149,7 @@ export async function TMDBGenreCheck() {
 
 // --- TMDB CREATE AND CONNECT FUNCTIONS ---
 
-//helper function to compress
+//helper function to compress create function
 async function TMDBCreateMovie(movie: TMDBCreateMovieConversion) {
   return createMovie(movie, movie.tmdbid);
 }
