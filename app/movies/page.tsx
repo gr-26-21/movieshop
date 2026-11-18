@@ -59,6 +59,8 @@ export default async function MoviesPage({
               price={movie.price}
               releaseDate={movie.releaseDate.getFullYear()}
               imgURL={movie.imageUrl}
+              priority={movies[0]?.id === movie.id}
+              href={`/movies/${movie.id}`}
               actions={
                 <div className="w-full space-y-3">
                   <div className="space-y-1 text-sm text-muted-foreground">
