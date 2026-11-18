@@ -24,10 +24,10 @@ const createMovieSchema = z.object({
 export async function checkAdmin() {
   const result = await getAdminSession();
   if (result.status === "authorized") {
-    console.error("Error: User not admin.");
     return true;
   }
-  return true; //set to false before commit
+  console.error("Error: User not admin.");
+  return false;
 }
 type CreateMovieInput = z.input<typeof createMovieSchema>;
 
