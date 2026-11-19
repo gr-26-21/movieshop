@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import TMDBImportButton from "./create/tmbd-import-button";
 
 export default async function AdminMoviesPage() {
   await requireAdmin();
@@ -32,7 +33,7 @@ export default async function AdminMoviesPage() {
         >
           + Create Movie
         </Link>
-
+        <TMDBImportButton />
         <Link
           href="/admin/movies/discard"
           className={buttonVariants({ variant: "outline", size: "lg" })}
