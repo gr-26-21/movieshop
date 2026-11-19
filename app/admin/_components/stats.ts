@@ -1,15 +1,14 @@
-import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { headers } from "next/headers";
 
 // Functions to fetch various statistics for the admin dashboard
 export async function getTotalUsers() {
   try {
-    const users = await auth.api.listUsers({
-      query: { sortBy: "name" },
-      headers: await headers(),
+    const totalUsers = await prisma.user.count({
+      where: {
+        role: "user",
+      },
     });
-    return users.total;
+    return totalUsers;
   } catch (error) {
     console.error("Failed to fetch users count:", error);
     return 0;
